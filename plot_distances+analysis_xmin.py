@@ -74,6 +74,7 @@ def smoothing_xmin(data,selected_pairs):
     params = {}
     new_xmin = {}
     for temp in sorted(data):
+        print(temp)
         chi2_reduced[temp] = {}
         params[temp] = {}             
         for i in range(len(selected_pairs)):
@@ -87,7 +88,7 @@ def smoothing_xmin(data,selected_pairs):
                     newrho.append(data[temp]['rho'][i])
                     newdata.append(data[temp]['dist'][atom_pair][i])
             #fit only if the size of the data is enough
-            print("len of data is", len(newdata))
+            print(atom_pair,"len of data is", len(newdata))
             if len(newdata) > 1:
                 if atom_pair == 'O2' or len(newdata) < 5:
                     function=linear
@@ -100,19 +101,20 @@ def smoothing_xmin(data,selected_pairs):
     #**** Compute the new xmin for each file and atom pair
     maxrho = 0
     for temp in sorted(data):
+        print(temp)
         for i in range(len(data[temp]['file'])):
             new_xmin[data[temp]['file'][i]] = {}
             for j in range(len(selected_pairs)):
                 atom_pair = selected_pairs[j][0]
                 rho=data[temp]['rho'][i]
                 if rho > maxrho: maxrho =rho
-                if len(params[temp][atom_pair]) == 2:
-                    function=linear
-                else: 
-                    function=poly3
                 if np.isnan(data[temp]['dist'][atom_pair][i]):
                     new_xmin[data[temp]['file'][i]][atom_pair]= np.nan
                 else:
+                    if len(params[temp][atom_pair]) == 2:
+                        function=linear
+                    else: 
+                        function=poly3
                     new_xmin[data[temp]['file'][i]][atom_pair]=function(rho,*params[temp][atom_pair])  
                 #print("for", data[temp]['file'][i], "and atom pair", atom_pair, "new xmin is", round(new_xmin[data[temp]['file'][i]][atom_pair],3), "compared to old", round(data[temp]['dist'][atom_pair][i],3))
     return new_xmin, maxrho, params, chi2_reduced
@@ -130,6 +132,7 @@ def main(argv):
     size_markers = {'oral':11,'article':4}
     size_lines = {'oral':4,'article':1}
     shift_label = {'oral':35,'article':20}
+    typefig = 'oral'
     #other dictionnaries and parameters for the figure
     markers = ['o','^','*','P','X','<','>','v','8','s','p','h','+','D'] #************************************Be sure you have enough markers for all the pairs you want to plot
     colors_T = {'T2':'#800080','T3':'#297fff','T4':'#00ff00','T4.5':'#bae200','T5':'#ffcd01','T5.5':'#ff6e00','T6':'#ff0101','T6.5':'#ff00a2','T7':'#ff01de','T7.5':'#ffa6f4','T10':'#ffe86e','T15':'#ffbf90','T20':'#ff7788'}
@@ -161,16 +164,18 @@ def main(argv):
         elif opt in ('-a','--atoms'):
             atoms = arg.split(',')                      #list of atom pairs we want to analyze here
         elif opt in ('-t','--typefigure'):
-            size_fonts_axis = size_fonts_axis[str(arg)]  #in this step, the dictionnary became the float used for font size
-            size_fonts_ticks = size_fonts_ticks[str(arg)]
-            size_figure = size_figure[str(arg)]
-            size_markers = size_markers[str(arg)]
-            shift_label = shift_label[str(arg)]
-            size_lines = size_lines[str(arg)]  
+            typefig = str(arg)
         elif opt in ('-d','--distance'):
             distance_type = str(arg)
         elif opt in ('-b','--bondanalysis'):
             bondanalysis = int(arg)
+    #in this step, the dictionnary became the float used for font size
+    size_fonts_axis = size_fonts_axis[typefig]  
+    size_fonts_ticks = size_fonts_ticks[typefig]
+    size_figure = size_figure[typefig]
+    size_markers = size_markers[typefig]
+    shift_label = shift_label[typefig]
+    size_lines = size_lines[typefig]
     #******* 1st step: read the header and extract all relevant informations
     #creation of elements and number lists and initialization of T
     skip_head = 0
