@@ -390,7 +390,7 @@ def main(argv):
     bonds = {}
     add_X_O2 = 0
     try:
-        options,arg = getopt.getopt(argv,"hf:g:a:b:",["fgofrfile","gofrsfile","atoms","bondfile")
+        options,arg = getopt.getopt(argv,"hf:g:a:b:",["fgofrfile","gofrsfile","atoms","bondfile"])
     except getopt.GetoptError:
         print("analyze_1gofr_update.py -f <gofr_filename.dat> -g <subfolder_gofrs.txt> -a <couples of atoms>(ex: 'Ca-O,Ca-Ca') -b <bond filename to update> ")
         sys.exit()
