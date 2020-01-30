@@ -47,18 +47,18 @@ def main(argv):
     data = {}
     directory = os.curdir
     try:
-        options,arg = getopt.getopt(argv,"hf:a:d:",["fgofrfile","atoms","directory"])
+        options,arg = getopt.getopt(argv,"hg:a:d:",["gofrsfile","atoms","directory"])
     except getopt.GetoptError:
-        print("check_gofr_analysis.py -f <gofrs total filename> -a <pair of atoms>(ex: 'Ca-O,Ca-Ca') -d <directory where the gofr.dat files are located (option)>")
+        print("check_gofr_analysis.py -g <gofrs.txt filename> -a <pair of atoms>(ex: 'Ca-O,Ca-Ca') -d <directory where the gofr.dat files are located (option)>")
         sys.exit()
     for opt,arg in options:
         if opt == '-h':
             print('')
-            print('check_gofr_analysis.py program to plot gofr and int of each pair of atoms of the selected file along with the corresponding coordinence and bond length')
-            print("check_gofr_analysis.py -f <gofrs total filename> -a <pair of atoms>(ex: 'Ca-O,Ca-Ca') -d <directory where the gofr.dat files are located (option but required if you have different gofr.dat file with same name in different subfolders)>")
+            print('check_gofr_analysis.py program to plot g(r) and int of each pair of atoms of the selected file along with the corresponding coordinence and bond length')
+            print("check_gofr_analysis.py -g <gofrs.txt filename> -a <pair of atoms>(ex: 'Ca-O,Ca-Ca') -d <directory where the gofr.dat files are located (option but required if you have different gofr.dat file with same name in different subfolders)>")
             print('')
             sys.exit()
-        elif opt in ("-f", "--fgofrfile"):
+        elif opt in ("-g", "--gofrsfile"):
             gofrfile = str(arg)
         elif opt in ("-a", "--atoms"):
             atoms = arg.split(',')                      #list of atom pairs we want to analyze here)

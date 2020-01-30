@@ -16,7 +16,7 @@ from matplotlib.widgets import Button
 
 
 def average_bond(radius,gofr,xmin_gofr):
-    """compute [int(r^3 gofr(r)]/[r^2 gofr(r)] up to the 1st xmin"""
+    """compute int[r^3 gofr(r)]/int[r^2 gofr(r)] up to the 1st xmin"""
     ii = 0
     r3gofr = 0.0
     r2gofr = 0.0
@@ -390,20 +390,20 @@ def main(argv):
     bonds = {}
     add_X_O2 = 0
     try:
-        options,arg = getopt.getopt(argv,"hf:a:b:d:",["fgofrfile","atoms","bondfile","datafile"])
+        options,arg = getopt.getopt(argv,"hf:g:a:b:",["fgofrfile","gofrsfile","atoms","bondfile")
     except getopt.GetoptError:
-        print("analyze_1gofr_update.py -f <gofr_filename> -a <couples of atoms>(ex: 'Ca-O,Ca-Ca') -b <bond filename to update> -d <datafile (fullgofrs.txt)>")
+        print("analyze_1gofr_update.py -f <gofr_filename.dat> -g <subfolder_gofrs.txt> -a <couples of atoms>(ex: 'Ca-O,Ca-Ca') -b <bond filename to update> ")
         sys.exit()
     for opt,arg in options:
         if opt == '-h':
             print('*******')
             print('analyze_1gofr_update.py program to extract all relevant data from 1 gofr.dat file created by the script gofrs.py and write the corrected value (fitted or clicked) into the full gofrs.txt file and into the bonds.inp if indicated ')
-            print("analyze_1gofr_update.py -f <gofr_filename> -a <couples of atoms>(ex: 'Ca-O,Ca-Ca') -b <bond filename to update (option)> -d <datafile (fullgofrs.txt)>")
+            print("analyze_1gofr_update.py -f <gofr_filename.dat> -g <subfolder_gofrs.txt> -a <couples of atoms>(ex: 'Ca-O,Ca-Ca') -b <bond filename to update (option)>")
             print('WARNING! you have to click FIRST on the maximum, and THEN on the minimum')
             print('WARNING!!!! If you want precise clicked value, you have to click on the correct position of maximum and minimum')
             print(' ')
-            print("If datafile indicated, then this code replace the old data of the full gofrs file created by analyze_gofr_semi_automatique.py by the fitted value if you choose 'fit', by the clicked value if you choose 'click' or by 0 if you choose 'bad'")
-            print('If no datafile is provided, then this code creates a gofr_....txt file with the clicked value and the fitted value if fit was selected.')
+            print("If subfolder_gofrs.txt indicated, then this code replace the old data of the gofrs.txt file created by analyze_gofr_semi_automatique.py by the fitted value if you choose 'fit', by the clicked value if you choose 'click' or by 0 if you choose 'bad'")
+            print('If no file is provided, then this code creates a gofr_....txt file with the clicked value and the fitted value if fit was selected.')
             print('*******')
             print(' ')
             sys.exit()
@@ -413,7 +413,7 @@ def main(argv):
             atoms = arg.split(',')                      #list of atom couples we want to analyze here)
         elif opt in ("-b","--bondfile"):
             bondfile = str(arg)
-        elif opt in ("-d","--datafile"):
+        elif opt in ("-g","--gofrsfile"):
             datafile = str(arg)
     #******* -1st step: check for the presence of files
     if os.path.isfile(gofrfile):

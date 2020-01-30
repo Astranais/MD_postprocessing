@@ -147,19 +147,19 @@ def main(argv):
     #other parameters
     Na=6.022*10**23
     try:
-        options,arg = getopt.getopt(argv,"hf:a:t:d:b:",["filename","atom","typefigure","distance",'bondanalysis'])
+        options,arg = getopt.getopt(argv,"hg:a:t:d:b:",["gofrsfilename","atom","typefigure","distance",'bondanalysis'])
     except getopt.GetoptError:
-        print("plot_distances+analysis_xmin.py -f <gofr_compound.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2') -t <type figure>(oral or article) -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
+        print("plot_distances+analysis_xmin.py -g <gofrs_compound.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2') -t <type figure>(oral or article) -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
         sys.exit()
     for opt,arg in options:
         if opt == '-h':
             print('')
             print('plot_distances+analysis_xmin.py program to plot bondlength as a function of density for each T and only some pairs')
-            print("plot_distances+analysis_xmin.py -f <gofr_compound.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -t <type figure>(oral or article) -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
+            print("plot_distances+analysis_xmin.py -g <gofrs_compound.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -t <type figure>(oral or article) -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
             print("plot_distances+analysis_xmin.py requires fullgofrs.txt file (use analyze_gofrs_semi_automatic.py)")
             print('')
             sys.exit()
-        if opt in ('-f','--filename'):
+        if opt in ('-g','--gofrsfilename'):
             filename = str(arg)
         elif opt in ('-a','--atoms'):
             atoms = arg.split(',')                      #list of atom pairs we want to analyze here
