@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Created on Tues Apr 02 2017
-
 @author: anais
 Langage : Python3
 
-                ****     Plot the coordination number       ****
-                    along with the errors on the coordinence 
-                    obtained from the script coord-err.py
+                ****     Plot the one of the distance in .gofrs.txt       ****
+                  and update/create the .bonds.inp files with data smoothing
                     
 """
 
@@ -222,16 +219,16 @@ def main(argv):
     try:
         options,arg = getopt.getopt(argv,"hg:a:d:b:",["gofrsfilename","atom","distance",'bondanalysis'])
     except getopt.GetoptError:
-        print("plot_distances+analysis_xmin.py -g <gofrs.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
+        print("plot_distances+analysis_xmin.py -g <_gofrs.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
         sys.exit()
     for opt,arg in options:
         if opt == '-h':
             print('')
-            print('plot_distances+analysis_xmin.py program to plot bondlength as a function of density for each T and only some pairs')
-            print("plot_distances+analysis_xmin.py -g <gofrs.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
-            print("plot_distances+analysis_xmin.py requires fullgofrs.txt file (use analyze_gofrs_semi_automatic.py)")
+            print('plot_distances+analysis_xmin.py program to plot xmin,xmax or bond length as a function of density or acell for each T and only some pairs')
+            print("plot_distances+analysis_xmin.py -g <_gofrs.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
+            print("plot_distances+analysis_xmin.py requires _gofrs.txt file (use analyze_gofrs_semi_automatic.py)")
             print('')
-            print('WARNING: this script use the filenames inside the gofrs.txt file to extract the temperature and cell size for the plot. If you do have both information in your filenames at the same place, then update the function split_name to extract hem correctly.')
+            print('WARNING: this script use the filenames inside the _gofrs.txt file to extract the temperature and cell size for the plot. If you do have both information in your filenames at the same place, then update the function split_name to extract them correctly.')
             sys.exit()
         if opt in ('-g','--gofrsfilename'):
             filename = str(arg)
