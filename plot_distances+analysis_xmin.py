@@ -21,7 +21,6 @@ import glob
 import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from matplotlib.legend import Legend
 from matplotlib.ticker import AutoLocator,AutoMinorLocator
 import numpy as np
 import crystallography as cr
@@ -74,7 +73,7 @@ def smoothing_xmin(data,selected_pairs):
     params = {}
     new_xmin = {}
     for temp in sorted(data):
-        print(temp)
+        #print(temp)
         chi2_reduced[temp] = {}
         params[temp] = {}             
         for i in range(len(selected_pairs)):
@@ -88,7 +87,7 @@ def smoothing_xmin(data,selected_pairs):
                     newrho.append(data[temp]['rho'][i])
                     newdata.append(data[temp]['dist'][atom_pair][i])
             #fit only if the size of the data is enough
-            print(atom_pair,"len of data is", len(newdata))
+            #print(atom_pair,"len of data is", len(newdata))
             if len(newdata) > 1:
                 if atom_pair == 'O2' or len(newdata) < 5:
                     function=linear
@@ -100,14 +99,16 @@ def smoothing_xmin(data,selected_pairs):
                 print("Not enough data to fit any curve for atom pair ", atom_pair, " and temperature ", temp)
     #**** Compute the new xmin for each file and atom pair
     maxrho = 0
+    minrho = 9999
     for temp in sorted(data):
-        print(temp)
+        #print(temp)
         for i in range(len(data[temp]['file'])):
             new_xmin[data[temp]['file'][i]] = {}
             for j in range(len(selected_pairs)):
                 atom_pair = selected_pairs[j][0]
                 rho=data[temp]['rho'][i]
                 if rho > maxrho: maxrho =rho
+                if rho < minrho: minrho =rho
                 if np.isnan(data[temp]['dist'][atom_pair][i]):
                     new_xmin[data[temp]['file'][i]][atom_pair]= np.nan
                 else:
@@ -117,25 +118,97 @@ def smoothing_xmin(data,selected_pairs):
                         function=poly3
                     new_xmin[data[temp]['file'][i]][atom_pair]=function(rho,*params[temp][atom_pair])  
                 #print("for", data[temp]['file'][i], "and atom pair", atom_pair, "new xmin is", round(new_xmin[data[temp]['file'][i]][atom_pair],3), "compared to old", round(data[temp]['dist'][atom_pair][i],3))
-    return new_xmin, maxrho, params, chi2_reduced
+    return new_xmin, minrho, maxrho, params, chi2_reduced
 
 
 
+
+def update_bonds(bondfile,selected_pairs,atoms,new_xmin,unique_pairs,file):
+    print("bond file ",bondfile, ' updated')
+    # Extraction of bond file informations 
+    bonds = {}
+    with open(bondfile,'r') as b:
+        while True:
+            line = b.readline()
+            if not line:break
+            else:
+                entry = line.split('\n')[0].split('\t')
+                bonds[entry[0]+'-'+entry[1]] = entry[2]
+    # Update the bond dictionnary for this bondfile                
+    for i in range(len(selected_pairs)):
+        pair = selected_pairs[i][0]
+        if np.isnan(new_xmin[file][pair]):pass
+        else:
+            bonds[pair] = str(new_xmin[file][pair])
+        if pair != 'O2':
+            reversepair = pair.split('-')[1]+'-'+pair.split('-')[0]
+            bonds[reversepair] = str(new_xmin[file][pair])
+    # Update the bondfile
+    with open(bondfile, 'w') as b:
+        for pair in unique_pairs:
+            #we remove O2 from the loop because we only need elements pairs for bond files
+            if pair == 'O2': continue
+            #but if we need the xmin for O2, then when we compute it, it replaces the one for O-O
+            elif pair == 'O-O' and 'O2' in atoms:
+                try:
+                    b.write('O\tO\t'+bonds['O2']+'\n')
+                    print("replace O-O xmin by O2 xmin in bond file")
+                except KeyError:
+                    print("no O2 bond, nothing to change in O-O xmin")
+                    b.write('O\tO\t'+bonds['O-O']+'\n')
+            else:
+                b.write(pair.split('-')[0]+'\t'+pair.split('-')[1]+'\t'+bonds[pair]+'\n')
+        b.close()
+    
+def create_bonds(bondfile,selected_pairs,atoms,new_xmin,unique_pairs,file):
+    print("bond file ",bondfile, ' created')
+    # Create the bond dictionnary for this bondfile                
+    bonds = {}
+    selected_pairs_name= [] #we create this list instead of using atoms list directly in case we indicated a wrong atom pair in atoms list
+    for i in range(len(selected_pairs)):
+        selected_pairs_name.append(selected_pairs[i][0])
+    for pair in unique_pairs:
+        if pair in selected_pairs_name:
+            #we do analyze this atom_pair so we indicate the computed value
+            if np.isnan(new_xmin[file][pair]):
+                bonds[pair] = str(0)
+            else:
+                bonds[pair] = str(new_xmin[file][pair])
+            if pair != 'O2':
+                reversepair = pair.split('-')[1]+'-'+pair.split('-')[0]
+                bonds[reversepair] = str(new_xmin[file][pair])
+        else:
+            #we do not analyze this atom_pair so we fill with 0 except if it is a reverse pair
+            if pair != 'O2':
+                reversepair = pair.split('-')[1]+'-'+pair.split('-')[0]
+            if reversepair in selected_pairs_name: pass
+            else:
+                bonds[pair] = str(0)
+    # Write the bondfile
+    with open(bondfile, 'w') as b:
+        for pair in unique_pairs:
+            #we remove O2 from the loop because we only need elements pairs for bond files
+            if pair == 'O2': continue
+            #but if we need the xmin for O2, then when we compute it, it replaces the one for O-O
+            elif pair == 'O-O' and 'O2' in atoms:
+                try:
+                    b.write('O\tO\t'+bonds['O2']+'\n')
+                    print("replace O-O xmin by O2 xmin in bond file")
+                except KeyError:
+                    print("no O2 bond, nothing to change in O-O xmin")
+                    b.write('O\tO\t'+bonds['O-O']+'\n')
+            else:
+                b.write(pair.split('-')[0]+'\t'+pair.split('-')[1]+'\t'+bonds[pair]+'\n')
+        b.close()   
 
 
 def main(argv):
     """     ********* Main program *********     """
-    #parameters for the figures depending on the output format (presentation or article)
-    size_fonts_axis = {'oral':30,'article':10}
-    size_fonts_ticks = {'oral':19,'article':9}
-    size_figure = {'oral':(11.5,8.3),'article':(8,8)}
-    size_markers = {'oral':11,'article':4}
-    size_lines = {'oral':4,'article':1}
-    shift_label = {'oral':35,'article':20}
-    typefig = 'oral'
     #other dictionnaries and parameters for the figure
     markers = ['o','^','*','P','X','<','>','v','8','s','p','h','+','D'] #************************************Be sure you have enough markers for all the pairs you want to plot
     colors_T = {'T2':'#800080','T3':'#297fff','T4':'#00ff00','T4.5':'#bae200','T5':'#ffcd01','T5.5':'#ff6e00','T6':'#ff0101','T6.5':'#ff00a2','T7':'#ff01de','T7.5':'#ffa6f4','T10':'#ffe86e','T15':'#ffbf90','T20':'#ff7788'}
+    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (4,4),"size_markers" : 8,"size_lines" : 1,"shift_labelpad" : 20}
+    label = {'xmax':r"1st $g(r)$ peak location ($\AA$)",'xmin':r"Coordination sphere radius ($\AA$)",'bond':r"Bond length ($\AA$)"}
     #initialization of variables
     bondanalysis = 0
     elements = ''
@@ -147,35 +220,27 @@ def main(argv):
     #other parameters
     Na=6.022*10**23
     try:
-        options,arg = getopt.getopt(argv,"hg:a:t:d:b:",["gofrsfilename","atom","typefigure","distance",'bondanalysis'])
+        options,arg = getopt.getopt(argv,"hg:a:d:b:",["gofrsfilename","atom","distance",'bondanalysis'])
     except getopt.GetoptError:
-        print("plot_distances+analysis_xmin.py -g <gofrs_compound.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2') -t <type figure>(oral or article) -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
+        print("plot_distances+analysis_xmin.py -g <gofrs.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
         sys.exit()
     for opt,arg in options:
         if opt == '-h':
             print('')
             print('plot_distances+analysis_xmin.py program to plot bondlength as a function of density for each T and only some pairs')
-            print("plot_distances+analysis_xmin.py -g <gofrs_compound.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -t <type figure>(oral or article) -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
+            print("plot_distances+analysis_xmin.py -g <gofrs.txt> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -d <distance type to print ('xmax' or 'xmin' or 'bond')> -b <=1 if analysis and update of bondfiles, default =0>")
             print("plot_distances+analysis_xmin.py requires fullgofrs.txt file (use analyze_gofrs_semi_automatic.py)")
             print('')
+            print('WARNING: this script use the filenames inside the gofrs.txt file to extract the temperature and cell size for the plot. If you do have both information in your filenames at the same place, then update the function split_name to extract hem correctly.')
             sys.exit()
         if opt in ('-g','--gofrsfilename'):
             filename = str(arg)
         elif opt in ('-a','--atoms'):
             atoms = arg.split(',')                      #list of atom pairs we want to analyze here
-        elif opt in ('-t','--typefigure'):
-            typefig = str(arg)
         elif opt in ('-d','--distance'):
             distance_type = str(arg)
         elif opt in ('-b','--bondanalysis'):
             bondanalysis = int(arg)
-    #in this step, the dictionnary became the float used for font size
-    size_fonts_axis = size_fonts_axis[typefig]  
-    size_fonts_ticks = size_fonts_ticks[typefig]
-    size_figure = size_figure[typefig]
-    size_markers = size_markers[typefig]
-    shift_label = shift_label[typefig]
-    size_lines = size_lines[typefig]
     #******* 1st step: read the header and extract all relevant informations
     #creation of elements and number lists and initialization of T
     skip_head = 0
@@ -242,123 +307,48 @@ def main(argv):
                 else:
                     data[temperature0]['rho'].append(MN/(Na*float(acell)**3*10**(-24)))     #calculation density
                 data[temperature0]['file'].append(entry[0].split('/')[-1].split('.gofr.dat')[0])              #extract filename
+                #we replace the 0 (no data) by NaN
                 for i in range(len(selected_pairs)):
                     if float(entry[selected_pairs[i][1]]) == 0.0:
                         data[temperature0]['dist'][selected_pairs[i][0]].append(float('nan'))
                     else:
                         data[temperature0]['dist'][selected_pairs[i][0]].append(float(entry[selected_pairs[i][1]]))
     #******* 3rd step: bond analysis 
-    if bondanalysis == 1 and MN != 0:
-        #**** Smooth xmin data using fitting
-        new_xmin, maxrho, params, chi2_reduced = smoothing_xmin(data,selected_pairs)
+    #Smooth xmin data using fitting and get minrho, maxrho even if we don't want to update/create .bonds.inp
+    new_xmin, minrho, maxrho, params, chi2_reduced = smoothing_xmin(data,selected_pairs)
+    if bondanalysis == 1:    
         #**** Extract all gofrfiles available
-        files = []
+        allgofrfiles = []
         for dirpath, dirnames, filenames in os.walk(os.curdir):
-            files.extend(sorted(glob.glob(dirpath+'/*.gofr.dat')))
-        print("**** gofrfiles in the current directory are:", files)
-        #**** Check if the bondfile already exist: if yes we update it, if not we create it
-        for gofrfile in files:
-            file = gofrfile.split('/')[-1].split('.gofr.dat')[0]
-            bondfile = gofrfile.split('.gofr.dat')[0]+'.bonds.inp'
-            if (os.path.isfile(bondfile)):
-                print("bond file ",bondfile, ' updated')
-                # Extraction of bond file informations 
-                bonds = {}
-                with open(bondfile,'r') as b:
-                    while True:
-                        line = b.readline()
-                        if not line:break
-                        else:
-                            entry = line.split('\n')[0].split('\t')
-                            bonds[entry[0]+'-'+entry[1]] = entry[2]
-                # Update the bond dictionnary for this bondfile                
-                for i in range(len(selected_pairs)):
-                    pair = selected_pairs[i][0]
-                    #print("**** for", pair)
-                    #try:
-                    #    print("old xmin is", bonds[pair])
-                    #except KeyError: pass
-                    if np.isnan(new_xmin[file][pair]):pass
-                    else:
-                        bonds[pair] = str(new_xmin[file][pair])
-                    if pair != 'O2':
-                        reversepair = pair.split('-')[1]+'-'+pair.split('-')[0]
-                        bonds[reversepair] = str(new_xmin[file][pair])
-                    #try:
-                    #    print("new xmin is", bonds[pair])
-                    #except KeyError: pass
-                # Update the bondfile
-                with open(bondfile, 'w') as b:
-                    for pair in unique_pairs:
-                        #we remove O2 from the loop because we only need elements pairs for bond files
-                        if pair == 'O2': continue
-                        #but if we need the xmin for O2, then when we compute it, it replaces the one for O-O
-                        elif pair == 'O-O' and 'O2' in atoms:
-                            try:
-                                b.write('O\tO\t'+bonds['O2']+'\n')
-                                print("replace O-O xmin by O2 xmin in bond file")
-                            except KeyError:
-                                print("no O2 bond, nothing to change in O-O xmin")
-                                b.write('O\tO\t'+bonds['O-O']+'\n')
-                        else:
-                            b.write(pair.split('-')[0]+'\t'+pair.split('-')[1]+'\t'+bonds[pair]+'\n')
-                    b.close()
-            else:
-                print("bond file ",bondfile, ' created')
-                # Create the bond dictionnary for this bondfile                
-                bonds = {}
-                selected_pairs_name= [] #we create this list instead of using atoms list directly in case we indicated a wrong atom pair in atoms list
-                for i in range(len(selected_pairs)):
-                    selected_pairs_name.append(selected_pairs[i][0])
-                for pair in unique_pairs:
-                    if pair in selected_pairs_name:
-                        #we do analyze this atom_pair so we indicate the computed value
-                        if np.isnan(new_xmin[file][pair]):
-                            bonds[pair] = str(0)
-                        else:
-                            bonds[pair] = str(new_xmin[file][pair])
-                        if pair != 'O2':
-                            reversepair = pair.split('-')[1]+'-'+pair.split('-')[0]
-                            bonds[reversepair] = str(new_xmin[file][pair])
-                    else:
-                        #we do not analyze this atom_pair so we fill with 0 except if it is a reverse pair
-                        if pair != 'O2':
-                            reversepair = pair.split('-')[1]+'-'+pair.split('-')[0]
-                        if reversepair in selected_pairs_name: pass
-                        else:
-                            bonds[pair] = str(0)
-                # Write the bondfile
-                with open(bondfile, 'w') as b:
-                    for pair in unique_pairs:
-                        #we remove O2 from the loop because we only need elements pairs for bond files
-                        if pair == 'O2': continue
-                        #but if we need the xmin for O2, then when we compute it, it replaces the one for O-O
-                        elif pair == 'O-O' and 'O2' in atoms:
-                            try:
-                                b.write('O\tO\t'+bonds['O2']+'\n')
-                                print("replace O-O xmin by O2 xmin in bond file")
-                            except KeyError:
-                                print("no O2 bond, nothing to change in O-O xmin")
-                                b.write('O\tO\t'+bonds['O-O']+'\n')
-                        else:
-                            b.write(pair.split('-')[0]+'\t'+pair.split('-')[1]+'\t'+bonds[pair]+'\n')
-                    b.close()      
+            allgofrfiles.extend(sorted(glob.glob(dirpath+'/*.gofr.dat')))
+        print("**** gofrfiles in the current directory are:", allgofrfiles)
+        gofrfileslocation = {}
+        for gofrfile in allgofrfiles:
+            gofrfileslocation[gofrfile.split('/')[-1].split('.gofr.dat')[0]] = gofrfile
+        #**** For each line (gofrfile) in the .gofrs.txt file
+        for temp in sorted(data):
+            for file in  data[temp]['file']:
+                #Check if the bondfile already exist: if yes we update it, if not we create it
+                bondfile = gofrfileslocation[file].split('.gofr.dat')[0]+'.bonds.inp'
+                if (os.path.isfile(bondfile)):
+                    update_bonds(bondfile,selected_pairs,atoms,new_xmin,unique_pairs,file)
+                else:
+                    create_bonds(bondfile,selected_pairs,atoms,new_xmin,unique_pairs,file)           
     else:
-        "Bond analysis not done. If you selected the option -b 1, make sure you have the element names and number of atoms per element in the header of your file"
+        print("Bond analysis not done. If you want it, use option -b 1")
     #******* 4th step: plot of the data and write the deviation from mean in file
     plt.close(1)
-    h = 2.3 * len(atoms) #height of the figure depends on the number of pairs we display
-    fig = plt.figure(1,figsize = (8,h))
+    h = 2 * len(atoms) #height of the figure depends on the number of pairs we display
+    fig = plt.figure(1,figsize = (5,h))
     plt.subplots_adjust(top = 0.97, bottom = 0.07, right = 0.89, left = 0.07, hspace = 0, wspace = 0)
-    #Adjustment of ticks
+    #Creation of ticks
     if MN != 0:
         major_ticks = np.arange(0.5, 7, 0.5) 
         minor_ticks = np.arange(0.5, 7, 0.1)
     else:
         major_ticks = AutoLocator()
-        minor_ticks = AutoMinorLocator() 
+        minor_ticks = AutoMinorLocator()                                                                 
     #plot & write percentage variation of distance
-    
     ylim_allT = {}
     string = ''
     for atom_pair in atoms:
@@ -394,13 +384,12 @@ def main(argv):
             percent_var_mean = (range_var /  mean_dist) * 100
             all_percent=all_percent+'\t'+str(np.round(percent_var_mean,1))
             #print('percent var mean for', atom_pair, '=', np.round(percent_var_mean,1))
-            if MN != 0:
-                percent_var_mean_per_rho = percent_var_mean / ( np.nanmax(data[temperature0]['rho']) - np.nanmin(data[temperature0]['rho']) )
-                all_percent_rho=all_percent_rho+'\t'+str(np.round(percent_var_mean_per_rho,1))
+            percent_var_mean_per_rho = percent_var_mean / ( np.nanmax(data[temperature0]['rho']) - np.nanmin(data[temperature0]['rho']) )
+            all_percent_rho=all_percent_rho+'\t'+str(np.round(percent_var_mean_per_rho,1))
             #print('percent var mean  per rho for', atom_pair, '=', np.round(percent_var_mean_per_rho,1))
             #results from fit
-            if bondanalysis == 1 and MN != 0:
-                newrhoX = np.arange(0.5, maxrho, 0.1)
+            if bondanalysis == 1:
+                newrhoX = np.arange(minrho, maxrho+0.1, 0.1)
                 try:
                     all_params_a= all_params_a+'\t'+str(params[temp][atom_pair][0])
                     all_params_b= all_params_b+'\t'+str(params[temp][atom_pair][1])
@@ -414,7 +403,7 @@ def main(argv):
                         function = linear
                     all_chi2 = all_chi2+'\t'+str(chi2_reduced[temp][atom_pair])
                     #print('chi2 for', atom_pair, '=', chi2_reduced[temp][atom_pair])
-                    ax.plot(newrhoX,function(newrhoX,*params[temp][atom_pair]), '--',color=colors_T[temp] )
+                    ax.plot(newrhoX,function(newrhoX,*params[temp][atom_pair]), '-',color=colors_T[temp], linewidth = plot_parameters["size_lines"] )
                 except KeyError:
                     all_chi2 = all_chi2+'\t-'
                     all_params_a= all_params_a+'\t-'
@@ -422,8 +411,8 @@ def main(argv):
                     all_params_c= all_params_c+'\t-'
                     all_params_d= all_params_d+'\t-'
             #plot
-            ax.plot(data[temp]['rho'],data[temp]['dist'][atom_pair], marker = markers[atoms.index(atom_pair)], color=colors_T[temp], markersize = size_markers)
-            ax.text(1.025,0.5, atom_pair ,transform=ax.transAxes, fontsize=size_fonts_axis, fontweight='bold')
+            ax.plot(data[temp]['rho'],data[temp]['dist'][atom_pair], '--',  color=colors_T[temp], linewidth = plot_parameters["size_lines"], marker = markers[atoms.index(atom_pair)], markersize = plot_parameters["size_markers"])
+            ax.text(1.025,0.5, atom_pair ,transform=ax.transAxes, fontsize=plot_parameters["size_fonts"], fontweight='bold')
             #define bounds for axis
             if ylim_allT[atom_pair][1] < np.nanmax(data[temp]['dist'][atom_pair]):
                 ylim_allT[atom_pair][1] = np.nanmax(data[temp]['dist'][atom_pair])
@@ -438,45 +427,47 @@ def main(argv):
         f.write(all_params_b+'\n')
         f.write(all_params_c+'\n')
         f.write(all_params_d+'\n')
-        f.write('\n')
-        ax.set_xticks(major_ticks)
-        ax.set_xticks(minor_ticks, minor=True)                                           
+        f.write('\n')                           
+        #Adjustment of ticks and make the graph prettier
+        if MN != 0:
+            ax.set_xticks(major_ticks)
+            ax.set_xticks(minor_ticks, minor=True)
+        else:
+            ax.xaxis.set_major_locator(major_ticks)
+            ax.xaxis.set_minor_locator(minor_ticks)    
         ax.xaxis.set_ticks_position('both')
-        majorLocator = AutoLocator()
-        minorLocator = AutoMinorLocator()                                                        
         ax.yaxis.set_ticks_position('both')
+        majorLocator = AutoLocator()
+        minorLocator = AutoMinorLocator()
         ax.yaxis.set_major_locator(majorLocator)
         ax.yaxis.set_minor_locator(minorLocator)                
-#        plt.autoscale(axis='y')
+        ax.set_xlim(minrho,maxrho)
         ax.set_ylim(ylim_allT[atom_pair][0],ylim_allT[atom_pair][1])
-        if MN != 0 and bondanalysis == 1:
-            ax.set_xlim(0.5,maxrho)
-        else:
-            plt.autoscale(axis='x')
-        #we make the graph prettier
         if  atoms.index(atom_pair) != len(atoms)-1:
             plt.setp(ax.get_xticklabels(), visible=False)
-        ax.tick_params(which = 'both', labelsize = size_fonts_ticks, width = size_lines/2)   
+        ax.tick_params(which = 'both', labelsize = plot_parameters["size_font_ticks"], width = plot_parameters["size_lines"]/2)   
     f.close()
     # Fine-tune figure
     ax0 = fig.add_subplot(111, frameon=False) 
     plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, labelleft=False, left=False, labelright=False, right=False)
-    ax0.set_xlabel(r'Density (g.cm$^{-3}$)', fontweight = 'bold', fontsize = size_fonts_axis, labelpad = shift_label)
-    ax0.set_ylabel(r"Bond length ($\AA$)",fontsize=size_fonts_axis,fontweight='bold', labelpad = shift_label+shift_label/1.3)
+    if MN != 0:
+        ax0.set_xlabel(r'Density (g.cm$^{-3}$)', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], labelpad = plot_parameters["shift_labelpad"])
+    else:
+        ax0.set_xlabel(r'Cell size ($\AA$)', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], labelpad = plot_parameters["shift_labelpad"])    
+    ax0.set_ylabel(label[distance_type],fontsize=plot_parameters["size_fonts"],fontweight='bold', labelpad = plot_parameters["shift_labelpad"]+plot_parameters["shift_labelpad"]/1.3)
     #Legend 
     for temp in data: 
         legend_labels[str(int(float(temp.strip('T'))*1000))] =  mpatches.Patch(color=colors_T[temp])
     s = [(k, legend_labels[k]) for k in sorted(legend_labels.keys(),reverse = False)]      
-    legend = ax0.legend([v for k,v in s],[k for k,v in s], title = ' $\\bf{Temperature}$ \n           (K)',loc='upper left',bbox_to_anchor=(1.2, 1), fontsize = size_fonts_axis, borderaxespad=0.,ncol=1)
-    plt.setp(legend.get_title(),fontsize= size_fonts_axis)
-    plt.title(filename.split('.txt')[0].split('_')[1], fontsize = size_fonts_axis, fontweight='bold')
+    legend = ax0.legend([v for k,v in s],[k for k,v in s], title = ' $\\bf{Temperature}$ \n           (K)',loc='upper left',bbox_to_anchor=(1.2, 1), fontsize = plot_parameters["size_fonts"], borderaxespad=0.,ncol=1)
+    plt.setp(legend.get_title(),fontsize= plot_parameters["size_fonts"])
+    plt.title(filename.split('.txt')[0], fontsize = plot_parameters["size_fonts"], fontweight='bold')
     #save the figure
     string = ''
     for atom_pair in atoms:
         string = string+'_'+atom_pair
     figurename = 'distance_'+distance_type+'_'+filename[:-4]+string+'.png'
     fig.savefig(figurename, bbox_inches = 'tight', dpi = 150)
-    
     print(figurename, '   created')
     #plt.show()
    
