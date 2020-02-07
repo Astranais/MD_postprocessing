@@ -44,16 +44,17 @@ def headerfile(firstfile, dirpath):
     return f, allpairs, allpairs_ordered     #I return the newly created files f along with the list of element allpairs
 
 def average_bond(radius,gofr,xmin_gofr):
-    """compute [int(r^3 gofr(r)]/[r^2 gofr(r)] up to the 1st xmin"""
+    """compute [int(r gofr(r)]/[int(gofr(r))] up to the 1st xmin"""
+    #this is the weighted average
     ii = 0
-    r3gofr = 0.0
-    r2gofr = 0.0
-    
+#    dr = radius[2]-radius[1]
+    rgofr = 0.0
+    intgofr=0.0
     while radius[ii] < xmin_gofr:
-        r3gofr = r3gofr + radius[ii]**3 * gofr[ii]
-        r2gofr = r2gofr + radius[ii]**2 * gofr[ii]
+        rgofr +=  radius[ii] * gofr[ii] # * dr
+        intgofr += gofr[ii]   # * dr
         ii += 1
-    return r3gofr/r2gofr
+    return rgofr/intgofr
 
 
 def interactive_fit(data,file,allpairs, guess_xmax, guess_xmin, distance, bonds, pair):
@@ -423,7 +424,7 @@ def main(argv):
             print('        - y value associated')
             print('        - x value of the first min(gofr)')
             print('        - coordination # = y value of int(gofr) associated to previous x value')
-            print('        - bond length = [int(r^3 gofr(r)]/[r^2 gofr(r)] up to the 1st xmin')
+            print('        - average bond length = [int(r gofr(r)]/[int(gofr(r))] up to the 1st xmin')
             print('Default -b = 1,  the code write a bond file per gofr.dat file with the x value of the first minimum for each pair of atoms in a format that can be used by the speciation scripts ')
             print(' ')
             sys.exit()

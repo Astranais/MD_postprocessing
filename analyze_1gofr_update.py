@@ -16,16 +16,17 @@ from matplotlib.widgets import Button
 
 
 def average_bond(radius,gofr,xmin_gofr):
-    """compute int[r^3 gofr(r)]/int[r^2 gofr(r)] up to the 1st xmin"""
+    """compute [int(r gofr(r)]/[int(gofr(r))] up to the 1st xmin"""
+    #this is the weighted average
     ii = 0
-    r3gofr = 0.0
-    r2gofr = 0.0
-    
+#    dr = radius[2]-radius[1]
+    rgofr = 0.0
+    intgofr=0.0
     while radius[ii] < xmin_gofr:
-        r3gofr = r3gofr + radius[ii]**3 * gofr[ii]
-        r2gofr = r2gofr + radius[ii]**2 * gofr[ii]
+        rgofr +=  radius[ii] * gofr[ii] # * dr
+        intgofr += gofr[ii]   # * dr
         ii += 1
-    return r3gofr/r2gofr
+    return rgofr/intgofr
 
 
 def interactive_fit(data,gofrfile,allpairs,distance, bonds, pair, method):
