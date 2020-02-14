@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
-import sys,getopt,numpy,os.path,math,itertools
+
+###
+##AUTHORS: RAZVAN CARACAS
+###
+
+import sys,getopt,os.path,itertools
 import crystallography as cr
 import umd_process as up
-from subprocess import call
 
 
-def analysis_clusters(clusters,MyCrystal,ligands,minlife,Nsteps,FileName,rings):
+def analysis_clusters(clusters,MyCrystal,ligands,minlife,Nsteps,FileName,rings,TimeStep):
     #this functions builds the dictionary with all the clusters
     ###labels = {'',[]}
     ###labels = {'Mg2Si4O9',['4137141516171891929394956979899',start,end,duration]}
@@ -54,13 +58,13 @@ def analysis_clusters(clusters,MyCrystal,ligands,minlife,Nsteps,FileName,rings):
     FileAll = FileName + '.r' + str(rings) + '.popul.dat'
     #print ('Population will be written in ',FileAll,' file')
     fa = open(FileAll,'a')
-    newstring = 'Formula\tBegin\tEnd\tLifetime\t[Composition]\n'
+    newstring = 'Formula\tBegin(step)\tEnd(step)\tLifetime(fs)\t[Composition]\n'
     fa.write(newstring)
     #print('Formula - Begin : End : Lifetime - Composition')
     for kk in population.keys():
         #newstring = population[kk]['formula'] + '\t' + str(population[kk]['begin']*Nsteps) + '\t' + str(population[kk]['end']*Nsteps) + '\t' + str(population[kk]['lifetime']*Nsteps) + '\t' + str(population[kk]['composition']) + '\n'
         if population[kk]['lifetime'] > minlife/float(Nsteps):
-            newstring = population[kk]['formula'] + '\t' + str(population[kk]['begin']*Nsteps) + '\t' + str(population[kk]['end']*Nsteps) + '\t' + str(population[kk]['lifetime']*Nsteps) + '\t' + str(population[kk]['composition']) + '\n'
+            newstring = population[kk]['formula'] + '\t' + str(population[kk]['begin']*Nsteps) + '\t' + str(population[kk]['end']*Nsteps) + '\t' + str(population[kk]['lifetime']*TimeStep*Nsteps) + '\t' + str(population[kk]['composition']) + '\n'
     #print(population[kk]['formula'],population[kk]['begin']*Nsteps,population[kk]['end']*Nsteps,population[kk]['lifetime']*Nsteps,population[kk]['composition'])
             fa.write(newstring)
     
@@ -73,13 +77,13 @@ def analysis_clusters(clusters,MyCrystal,ligands,minlife,Nsteps,FileName,rings):
         while flagnewclust == 0:
             #print('comparing to cluster',statclusters[ll][0])
             if population[kk]['formula'] == statclusters[ll][0]:
-                statclusters[ll][1] += population[kk]['lifetime']*Nsteps
+                statclusters[ll][1] += population[kk]['lifetime']*TimeStep*Nsteps
                 #print('current population is',statclusters[ll][1])
                 flagnewclust = 1
             else:
                 if ll == len(statclusters)-1:
                     #print('adding new cluster',population[kk]['formula'])
-                    statclusters.append([population[kk]['formula'],population[kk]['lifetime']*Nsteps,len(population[kk]['composition'])])
+                    statclusters.append([population[kk]['formula'],population[kk]['lifetime']*TimeStep*Nsteps,len(population[kk]['composition'])])
                     flagnewclust = 1
                 else:
                     ll +=1
@@ -90,7 +94,7 @@ def analysis_clusters(clusters,MyCrystal,ligands,minlife,Nsteps,FileName,rings):
     FileStat = FileName + '.r' + str(rings) + '.stat.dat'
 #print ('Statistics will be written in ',FileStat,' file')
     fs = open(FileStat,'a')
-    newstring = 'Cluster\tTime\tPercent\n'
+    newstring = 'Cluster\tTime(fs)\tPercent\n'
     fs.write(newstring)
     for ll in range(1,len(statclusters)):
         newstring = statclusters[ll][0] + '\t' + str(statclusters[ll][1]) + '\t' + str(float(statclusters[ll][1])/float(totalpop)) + '\t' + str(statclusters[ll][2]) + '\n'
@@ -99,23 +103,21 @@ def analysis_clusters(clusters,MyCrystal,ligands,minlife,Nsteps,FileName,rings):
                                                                                                                                                                                
 def neighboring(BooleanMap,ligands,iatom,newcluster):
     newcluster.append(ligands[iatom])
-    if iatom < len(ligands):
-        #        for jatom in range(ligands[iatom+1],len(ligands)):
-        for jatom in range(len(ligands)):
-            if BooleanMap[ligands[iatom]][ligands[jatom]]==1:
-                #print('bond between',ligands[iatom],ligands[jatom])
-                BooleanMap[ligands[iatom]][ligands[jatom]]=0
-                BooleanMap[ligands[jatom]][ligands[iatom]]=0
-                #print ('next atom',ligands[jatom])
-                newcluster=neighboring(BooleanMap,ligands,jatom,newcluster)
+    for jatom in range(len(ligands)):
+        if BooleanMap[ligands[iatom]][ligands[jatom]]==1:
+            #print('bond between',ligands[iatom],ligands[jatom])
+            BooleanMap[ligands[iatom]][ligands[jatom]]=0
+            BooleanMap[ligands[jatom]][ligands[iatom]]=0
+            #print ('next atom',ligands[jatom])
+            newcluster=neighboring(BooleanMap,ligands,jatom,newcluster)
     return newcluster
+
+
 def clustering(BooleanMap,ligands):
     #print('     clustering: start')
     #print ('ligands:',ligands)
-    icluster = -1
     neighbors = []
-    i=[]
-    monogas = []
+    totNbonds = 0
     for iatom in range(len(ligands)):
         #print('sum of bonds for atom ',iatom,ligands[iatom],sum(BooleanMap[ligands[iatom]]))
         #for jatom in range(len(ligands)):
@@ -124,8 +126,10 @@ def clustering(BooleanMap,ligands):
         if sum(BooleanMap[ligands[iatom]]) == 0:            #this part has to be treated first, as after clustering a lot of bonds are removed from BooleanMap
                                                             # in the neiboring routine
                                                             # and atoms that are bonded would appear as a monoatomic gas
-#            monogas.append(ligands[iatom])
             neighbors.append([ligands[iatom]])
+        totNbonds+=sum(BooleanMap[ligands[iatom]])
+    #print("TOTAL #bonds",totNbonds/2)
+    sys.setrecursionlimit(int(totNbonds/2)) #change the recursion limit
     for iatom in range(len(ligands)):
         if sum(BooleanMap[ligands[iatom]]) > 0:
             #print('current atom',iatom,ligands[iatom],BooleanMap[ligands[iatom]],sum(BooleanMap[ligands[iatom]]))
@@ -137,32 +141,16 @@ def clustering(BooleanMap,ligands):
             newcluster = [i[0] for i in itertools.groupby(newcluster1)]
             if len(newcluster)>1:
                 neighbors.append(newcluster)
-#    for katom in range(1,len(monogas)):
-#        neighbors.append([monogas[katom]])
-#    for iatom in range(len(ligands)):
-#        curratom = ligands[iatom]
-#        print('for atom ',curratom,'bonds are ',BooleanMap[12],' with the sum ',sum(BooleanMap[12]))
-#        if sum(BooleanMap[ligands[iatom]]) == 0:
-#            neighbors.append([ligands[iatom]])
-#        else:
-#            print('current atom with non-null bonds',iatom,ligands[iatom],BooleanMap[ligands[iatom]])
-#            newcluster = []
-#            newcluster1 = neighboring(BooleanMap,ligands,iatom,newcluster)
-#            newcluster1.sort()
-#            newcluster = [i[0] for i in itertools.groupby(newcluster1)]
-#            if len(newcluster)>1:
-#                neighbors.append(newcluster)
-#print('neighbors is ',neighbors)
     return neighbors
 def clusteringnorings(BooleanMap,centralatoms,outeratoms):
     #print ('ligands:',ligands)
-    icluster = -1
     neighbors = []
     for iatom in range(len(centralatoms)):
         newcluster = [centralatoms[iatom]]
         for jatom in range(len(outeratoms)):
             if BooleanMap[centralatoms[iatom]][outeratoms[jatom]]==1:
                 newcluster.append(outeratoms[jatom])
+        #print(newcluster)
         if len(newcluster)>1:
             neighbors.append(newcluster)
     return neighbors
@@ -238,9 +226,8 @@ def read_inputfile(InputFile,MyCrystal,ClusterAtoms):
 
 def main(argv):
     up.headerumd()
-    UMDname='UMD'
+    UMDname='output.umd.dat'
     Nsteps = 1
-    InitialStep = 0
     ClusterAtoms = []
     Cations = []
     Anions = []
@@ -250,14 +237,15 @@ def main(argv):
     rings = 1
     header = ''
     try:
-        opts, arg = getopt.getopt(argv,"hf:s:l:c:a:m:i:r:",["fUMDfile","sNsteps","lMaxLength","cCations","aAnions","mMinlife","iInputFile","rRings"])
+        opts, arg = getopt.getopt(argv,"hf:s:l:c:a:m:i:r:",["fUMDfile","sSampling_Frequency","lMaxLength","cCations","aAnions","mMinlife","iInputFile","rRings"])
     except getopt.GetoptError:
-        print ('speciation.py -f <UMD_filename> -s <Nsteps> -l <MaxLength> -c <Cations> -a <Anions> -m <MinLife> -i <InputFile> -r <Rings>')
+        print ('speciation.py -f <UMD_filename> -s <Sampling_Frequency> -l <MaxLength> -c <Cations> -a <Anions> -m <MinLife> -i <InputFile> -r <Rings>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
             print ('speciation.py program to compute bonding maps and identify speciation')
-            print ('speciation.py -f <UMD_filename> -s <Nsteps> -l <MaxLength> -c <Cations> -a <Anions> -m <MinLife>  -i <InputFile> -r <Rings>')
+            print ('speciation.py -f <UMD_filename> -s <Sampling_Frequency> -l <MaxLength> -c <Cations> -a <Anions> -m <MinLife>  -i <InputFile> -r <Rings>')
+            print ('  default values: -f output.umd.dat -s 1 -l 3.0 -m 0 -r 1')
             print (' the input file contains the bond lengths for the different atom pairs. \n the values overwrite the option -l')
             print (' rings = 1 default, polymerization, all anions and cations bond to each other; rings = 0 only individual cation-anion groups')
             sys.exit()
@@ -275,11 +263,11 @@ def main(argv):
         elif opt in ("-m","--mMinlife"):
             minlife = float(arg)
         elif opt in ("-c","--Cations"):
-            header = header + arg
+            header = header + ' -c=' + arg
             Cations = arg.split(",")
             #print ('Cation list is: ',Cations)
         elif opt in ("-a","--Anions"):
-            header = header + arg
+            header = header + ' -a=' + arg
             Anions= arg.split(",")
             #print ('Anion list is: ',Anions)
         elif opt in ("-i", "--iInputFile"):
@@ -302,9 +290,10 @@ def main(argv):
         sys.exit()
 
     for ii in range(len(Cations)):
-        ClusterAtoms.append(Cations[ii])
+        ClusterAtoms.append(Cations[ii])    
     for ii in range(len(Anions)):
-        ClusterAtoms.append(Anions[ii])
+        if Anions[ii] not in ClusterAtoms:
+            ClusterAtoms.append(Anions[ii])      
     if rings == 0:
         print('searching for cations',Cations)
         print('surrounded by anions ',Anions)
@@ -326,12 +315,13 @@ def main(argv):
     fa.close()
 
                   
-#reading the xc art coordinates of the atoms from the UMD file. it uses the read_xcart (i.e. only xcart) function from the umd_process library
+#reading the xcart coordinates of the atoms from the UMD file. it uses the read_xcart (i.e. only xcart) function from the umd_process library
     MyCrystal = cr.Lattice()
     AllSnapshots = [cr.Lattice]
     (MyCrystal,AllSnapshots,TimeStep)=up.read_xcart(UMDname)
     #print('checks after reading the umd file')
     #print('no of atoms = ',MyCrystal.natom)
+    print('TimeStep in the simu is',TimeStep,' fs')
 
 
 #reading the cutoff radii for the bonds
@@ -376,7 +366,7 @@ def main(argv):
         else:
             print ('value of rings = ',rings,' is not allowed. Only 0 (polymers) or 1 (coordinating polyhedra) are allowed',)
             sys.exit()
-    analysis_clusters(clusters,MyCrystal,ligands,minlife,Nsteps,UMDname,rings)
+    analysis_clusters(clusters,MyCrystal,ligands,minlife,Nsteps,UMDname,rings,TimeStep)
 
 #        read_umd(UMDname,Nsteps,maxlength,Cations,Anions,ClusterAtoms,minlife,InputFile,rings)
 #the read_umd function was replaced with the automatic one plus a bunch of separate funtions
