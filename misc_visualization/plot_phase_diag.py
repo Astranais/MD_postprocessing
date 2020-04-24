@@ -177,7 +177,7 @@ def main(argv):
         if opt == '-h':
             print('')
             print('plot_phase_diag.py program to plot the phase diagram ')
-            print("plot_phase_diag.py -f <filename> -g <filename 2 (if we want to plot 2 files)> -t <type of plot: y-x variables, ex: T-rho or P-rho> -l <letter of first plot, default = ''> -v <view = zoom or classic>")
+            print("plot_phase_diag.py -f <filename> -g <filename 2 (if we want to plot 2 files)> -t <type of plot: y-x variables, ex: T-rho or P-rho> -l <letter of first plot, default = ''> -v <view = zoom,classic,full>")
             print("plot_phase_diag.py requires to be lauched from the folder containing every phase_diag_compound.txt file")
             print('')
             sys.exit()
@@ -357,14 +357,14 @@ def main(argv):
         
         #**text on plot        
         if yvariable == 'T' and xvariable == 'rho':
-            positiontext = {'zoom':{'supercrit':(0.98,0.91),'liquid':(0.98,0.42),'liquidg':(0.5,3500),'+gas':(0.5,3200)} ,'classic':{'supercrit':(0.98,0.91),'liquid':(0.98,0.42),'liquidg':(0.5,3500),'+gas':(0.5,3200)}, 'full':{'supercrit':(0.4,0.91),'liquid':(0.5,0.21)}   }
+            positiontext = {'zoom':{'supercrit':(0.98,0.91),'liquid':(0.98,0.42),'liquidg':(0.9,3500),'+gas':(0.9,3200)} ,'classic':{'supercrit':(0.98,0.91),'liquid':(0.98,0.42),'liquidg':(0.7,3500),'+gas':(0.7,3200)}, 'full':{'supercrit':(0.4,0.91),'liquid':(0.5,0.21)}   }
             ax.text(positiontext[view]['supercrit'][0],positiontext[view]['supercrit'][1], "Supercritical" , transform=ax.transAxes, horizontalalignment = 'right', fontsize = plot_parameters["size_fonts"])
             ax.text(positiontext[view]['liquid'][0],positiontext[view]['liquid'][1], "Liquid" , transform=ax.transAxes, horizontalalignment = 'right', fontsize = plot_parameters["size_fonts"])
             if view != 'full':
                 ax.text(positiontext[view]['liquidg'][0],positiontext[view]['liquidg'][1], "Liquid" ,  horizontalalignment = 'left', fontsize = plot_parameters["size_fonts"])
                 ax.text(positiontext[view]['+gas'][0],positiontext[view]['+gas'][1], "+ Gas" , horizontalalignment = 'left', fontsize = plot_parameters["size_fonts"])                
         elif yvariable == 'P' and xvariable == 'rho':
-            positiontext = {'zoom':{'supercrit':(0.4,0.85),'liquidg':(0.05,0.25),'+gas':(0.05,0.2)} ,'classic':{'supercrit':(0.4,0.85),'liquidg':(0.05,0.25),'+gas':(0.05,0.2)}, 'full':{'supercrit':(0.4,0.55)}   }
+            positiontext = {'zoom':{'supercrit':(0.4,0.85),'liquidg':(0.4,0.25),'+gas':(0.4,0.2)} ,'classic':{'supercrit':(0.4,0.85),'liquidg':(0.6,0.25),'+gas':(0.6,0.2)}, 'full':{'supercrit':(0.4,0.55)}   }
             ax.text(positiontext[view]['supercrit'][0],positiontext[view]['supercrit'][1], "Supercritical" , transform=ax.transAxes, horizontalalignment = 'right', fontsize = plot_parameters["size_fonts"])
             if view != 'full':
                 ax.text(positiontext[view]['liquidg'][0],positiontext[view]['liquidg'][1], "Liquid" ,  transform=ax.transAxes, horizontalalignment = 'left', fontsize = plot_parameters["size_fonts"])
