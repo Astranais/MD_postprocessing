@@ -150,7 +150,9 @@ def main(argv):
     impactor_velocities = [12.9,15.2,18.1,8.3,11.5,15.2] #in km/s, see bibliography excel file
     impactor_density = 3000 #kg/m3
     #figure dictionnary
-    colors_T = {'T2':'#800080','T3':'#297fff','T4':'#00ff00','T4.5':'#bae200','T5':'#ffcd01','T5.5':'#ff6e00','T6':'#ff0101','T6.5':'#ff00a2','T7':'#ff01de','T7.5':'#ffa6f4','T10':'#ffe86e','T15':'#ffbf90','T20':'#ff7788'}
+    colors_T = {'T2':'#800080','T3':'#297fff','T4':'#00ff00','T4.5':'#bae200',
+                'T5':'#ffcd01','T5.5':'#ff6e00','T6':'#ff0101','T6.5':'#ff00a2',
+                'T7':'#ff01de','T7.5':'#ffa6f4','T10':'#ffe86e','T15':'#ffbf90','T20':'#ff7788'}
     #other parameters
     Na=6.022*10**23
     eVtoJ = 1.6e-19        #1eV = 1.6e-19 J
@@ -270,23 +272,30 @@ def main(argv):
                         #******We fit a BM3 to this isotherm in order to find the correct pressure corresponding to the Hugoniot density
                         if len(rho[temperature]) >= 4:
                             #Fit of the equation and calculation of the corresponding chi2
-                            m0 = {'T3':[2600,15,4],'T4':[2600,15,4],'T5':[2600,15,4],'T6':[2600,15,4],'T10':[2600,15,4],'T15':[2600,15,4],'T20':[2600,15,4]} #rho0 in kg/m3, K0 in GPa, Kp0
+                            m0 = {'T3':[2600,15,4],'T4':[2600,15,4],'T5':[2600,15,4],
+                                  'T6':[2600,15,4],'T10':[2600,15,4],'T15':[2600,15,4],'T20':[2600,15,4]} #rho0 in kg/m3, K0 in GPa, Kp0
                             drho = 0.1
                             try: #odr fit
                                 eos_model_BM3 = odr.Model(BM3_P_rho)  # model for fitting
                                 stdev_rho = [i/1000 for i in rho[temperature]] #creation of stdev for rho
-                                data_for_ODR = odr.RealData(rho[temperature], P[temperature], stdev_rho, stdev_P[temperature]) # RealData object using our data
-                                odr_process = odr.ODR(data_for_ODR, eos_model_BM3, beta0=m0[temperature], maxit = 10000) # Set up orth-dist-reg with the model and data
+                                data_for_ODR = odr.RealData(rho[temperature], P[temperature], 
+                                                            stdev_rho, stdev_P[temperature]) # RealData object using our data
+                                odr_process = odr.ODR(data_for_ODR, eos_model_BM3, 
+                                                      beta0=m0[temperature], maxit = 10000) # Set up orth-dist-reg with the model and data
                                 odr_results = odr_process.run() # run the regression
                                 print('***************',temperature, "Fit of BM3")
                                 odr_results.pprint() # use the pprint method to display results
                                 DensityX=np.arange(rho[temperature][-1]-drho,rho[temperature][0]+drho,drho) 
-                                ax.plot(DensityX,BM3_P_rho(odr_results.beta,DensityX),'-', color=colors_T[temperature], label= temperature + ' BM3 fit')
-                                ax.plot(rho[temperature],P[temperature],'o', color=colors_T[temperature], label= temperature + ' data')
+                                ax.plot(DensityX,BM3_P_rho(odr_results.beta,DensityX),
+                                        '-', color=colors_T[temperature], label= temperature + ' BM3 fit')
+                                ax.plot(rho[temperature],P[temperature],'o', 
+                                        color=colors_T[temperature], label= temperature + ' data')
                                 #print(str(temperature) + '\t' + str('{:1.2e}'.format(odr_results.res_var)) + '\t' + str('{:1.2e}'.format(odr_results.beta[0])) + '\t' + str('{:1.2e}'.format(odr_results.beta[1])) + '\t' + str('{:1.2e}'.format(odr_results.beta[2])) + '\t' + str('{:1.2e}'.format(odr_results.sd_beta[0])) + '\t' + str('{:1.2e}'.format(odr_results.sd_beta[1])) + '\t' + str('{:1.2e}'.format(odr_results.sd_beta[2]))  + '\n')
-                                chi2 = chi2red(odr_results.beta,rho[temperature],P[temperature],stdev_P[temperature])
+                                chi2 = chi2red(odr_results.beta,rho[temperature],
+                                               P[temperature],stdev_P[temperature])
                                 #print('residual variance',odr_results.res_var)
-                                P0 = fonction_BM3(rho0,odr_results.beta[0],odr_results.beta[1],odr_results.beta[2])
+                                P0 = fonction_BM3(rho0,odr_results.beta[0],odr_results.beta[1],
+                                                  odr_results.beta[2])
                                 string = string + '\t' + str(round(rho0)) + '\t' + str(round(P0,2)) + '\t' + str(round(odr_results.beta[0])) + '\t' + str(round(odr_results.beta[1],2)) + '\t' + str(round(odr_results.beta[2],2)) + '\t' + str(round(chi2,2))
                             #This is the theoretical model (initial guesses), based on common values 
 #                            m0=np.array([2600, 19, 6]) #rho0 in kg/m3, K0 in GPa, Kp0
@@ -304,11 +313,15 @@ def main(argv):
                             #if least-square minimization fails
                             except RuntimeError:
                                 try:
-                                    popt, pcov = curve_fit(poly3, rho[temperature], P[temperature], p0=None, sigma=stdev_P[temperature], absolute_sigma=False )
+                                    popt, pcov = curve_fit(poly3, rho[temperature], 
+                                                           P[temperature], p0=None, 
+                                                           sigma=stdev_P[temperature], absolute_sigma=False )
                                     chi2 = chi2red_3(rho[temperature],P[temperature],stdev_P[temperature],popt)
                                     DensityX=np.arange(3200,6300,10)
-                                    ax.plot(DensityX,poly3(DensityX,*popt),'--', color=colors_T[temperature], label= temperature + ' poly3 fit')
-                                    ax.plot(rho[temperature],P[temperature],'o', color=colors_T[temperature], label= temperature + ' data')
+                                    ax.plot(DensityX,poly3(DensityX,*popt),'--', 
+                                            color=colors_T[temperature], label= temperature + ' poly3 fit')
+                                    ax.plot(rho[temperature],P[temperature],'o', 
+                                            color=colors_T[temperature], label= temperature + ' data')
                                     print("Least-square fit of poly3")
                                     P0 = poly3(rho0,*popt)
                                     string = string + '\t' + str(round(rho0)) + '\t' + str(round(P0,2)) + '\t-\t-\t-\t' + str(round(chi2,2))
@@ -316,11 +329,13 @@ def main(argv):
                                     print("Fail of both BM3 a,nd poly3 fit")
                                     P0 = P[temperature][i] - hugoniot[temperature][i]/( (hugoniot[temperature][i]-hugoniot[temperature][i-1])/(P[temperature][i]-P[temperature][i-1]) )   
                                     string = string + '\t' + str(round(rho0)) + '\t' + str(round(P0,2)) + '\t-\t-\t-\t-'
-                                    ax.plot(rho[temperature],P[temperature],'o', color=colors_T[temperature], label= temperature + ' data')
+                                    ax.plot(rho[temperature],P[temperature],'o', 
+                                            color=colors_T[temperature], label= temperature + ' data')
                         #if we don't have enough data, we find P using same method as for finding rho
                         else:
                             print("Not enough data for BM3 fit")
-                            ax.plot(rho[temperature],P[temperature],'o', color=colors_T[temperature], label= temperature + ' data')
+                            ax.plot(rho[temperature],P[temperature],'o', 
+                                    color=colors_T[temperature], label= temperature + ' data')
                             P0 = P[temperature][i] - hugoniot[temperature][i]/( (hugoniot[temperature][i]-hugoniot[temperature][i-1])/(P[temperature][i]-P[temperature][i-1]) )   
                             string = string + '\t' + str(round(rho0)) + '\t' + str(round(P0,2)) + '\t-\t-\t-\t-'
                         #Calculation of E0 in J/kg (E hugoniot) using Hugoniot equation and rho,P Hugoniot
