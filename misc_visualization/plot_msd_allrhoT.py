@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Oct  12 2017
-
 @author: anais
 Langage : Python3
 
@@ -11,6 +9,10 @@ Langage : Python3
                             every rho on each graph
                              *************  ARTICLE VERSION  *************
 
+
+Scientific color maps from:
+    The software : Crameri, F. (2018a), Scientific colour-maps. Zenodo. http://doi.org/10.5281/zenodo.1243862
+    The research : Crameri, F. (2018b), Geodynamic diagnostics, scientific visualisation and StagLab 3.0, Geosci. Model Dev., 11, 2541-2562, doi:10.5194/gmd-11-2541-2018
 """
 
 
@@ -25,6 +27,7 @@ import crystallography as cr
 import natsort
 import re
 from matplotlib.lines import Line2D #useful to create a custom legend
+from matplotlib.colors import LinearSegmentedColormap
 
 
 
@@ -40,13 +43,6 @@ def split_name(filename):
 
 def main(argv):
     """     ********* Main program *********     """
-    #parameters for the figures depending on the output format (presentation or article)
-    size_fonts = {'oral':30,'article':12} #size in px
-    size_fonts_ticks = {'oral':19,'article':10}
-    size_figure = {'oral':(18.5,16),'article':(14,14)}
-    size_markers = {'oral':11,'article':4}
-    size_lines = {'oral':4,'article':2} #linewidth in pt
-    shift_label = {'oral':45,'article':20}
     #other dictionnaries and parameters for the figure
     colors_densities = {}
     lines = {}   #dictionnary for the lines for legend (the keys are acell or densities, and values are the color of lines)
@@ -56,25 +52,23 @@ def main(argv):
     #other parameters
     Na=6.022*10**23  #avogadro constant
     try:
-        options,arg = getopt.getopt(argv,"hm:t:",["mineralfile","typefigure"])
+        options,arg = getopt.getopt(argv,"hm:",["mineralfile"])
     except getopt.GetoptError:
-        print("plot_msd_allrhoT.py  -m <mineralfile with elements> -t <type figure>(oral or article)")
+        print("plot_msd_allrhoT.py  -m <mineralfile with elements>")
         sys.exit()
     for opt,arg in options:
         if opt == '-h':
             print("plot_msd_allrhoT.py script to plot all the msd at every acell and T (matrix with atom in columns and T in lines)")
-            print("plot_msd_allrhoT.py  -m <mineralfile with elements>-t <type figure>(oral or article)")
+            print("plot_msd_allrhoT.py  -m <mineralfile with elements> ")
             print('requires the file containing elements and number (in order to compute the densities)')
             sys.exit()
         elif opt in ("-m","--mineralfile"):
             mineralfile = str(arg)
-        elif opt in ("-t","--typefigure"):
-            size_fonts = size_fonts[str(arg)]  #in this step, the dictionnary became the float used for font size
-            size_fonts_ticks = size_fonts_ticks[str(arg)]
-            size_figure = size_figure[str(arg)]
-            size_markers = size_markers[str(arg)]
-            size_lines = size_lines[str(arg)]
-            shift_label = shift_label[str(arg)]
+    size_fonts = 12
+    size_fonts_ticks = 10
+    size_figure = (14,14)
+    size_lines = 2
+    shift_label = 20
     #***** Calculation of the molecular mass
     with open(mineralfile,'r') as mf:
         entry = mf.readline()
@@ -125,20 +119,24 @@ def main(argv):
         #we store the densities into the dictionnary
         colors_densities[round(Density,1)] = []
     #now the dictionary has every possible densities of our mineral, we attribute the colors to each density
-    list_densities = []
-    color = iter(plt.cm.rainbow(np.linspace(0,1,len(colors_densities)))) #Creation of the color list
+    name = 'devon'
+    cm_data = np.loadtxt("/Users/akobsch/Dropbox/Recherche/PhD-MD-silicates/simulations/scripts/Analysis/ScientificColourMaps6/"+name+"/"+name+".txt")
+    #cm_data = cm_data[::-1] #for reverse colors (hawaii,lajolla)
+    new_map = LinearSegmentedColormap.from_list('new', cm_data[:-20]) #cm_data[:-20] for devon, davos, oslo
+    color = iter(new_map(np.linspace(0,1,len(colors_densities)))) #Creation of the color list  
+    allrho = []
     for key in natsort.natsorted(colors_densities):
         c = next(color)
         colors_densities[key] = c
-        list_densities.append(key) #list usefull if we want to plot the value of densities near to the lines, see plot_speciation_r0
-    print(list_densities, len(list_densities))
+        allrho.append(key)
     #*****************************
     #*******************
     #*******
     #Read & plot 
     plt.close(1)
     fig = plt.figure(1,figsize=size_figure)
-    plt.subplots_adjust(top = 0.97, bottom = 0.07, right = 0.89, left = 0.07, hspace = 0, wspace = 0)
+    plt.subplots_adjust(top = 0.97, bottom = 0.07, right = 0.89, left = 0.07, 
+                        hspace = 0, wspace = 0)
     plt.subplot(len(T_numsubplot),len(atoms),1)
     ax = plt.gca()
     for atom in atoms:
@@ -153,59 +151,71 @@ def main(argv):
                 ax = plt.gca()
                 temperature0 = temperature
             #importation of data
-            Temps,DataAtom = np.loadtxt(file,skiprows=1,usecols=(0,atoms.index(atom)+1),unpack=True)
-            #limitation of data along x 
-            Xlimit = 10000
-            ax.set_xlim(0,Xlimit)
-            for i in range(len(Temps)): 
-                if Temps[i] >= Xlimit:
-                    Temps[i] = np.NaN
-                    DataAtom[i] = np.NaN
+            Temps,DataAtom = np.loadtxt(file,skiprows=1,usecols=(0,atoms.index(atom)+1),unpack=True)            
             #plot
-            lines[str(round(Density,1))], = ax.plot(Temps,DataAtom,'-', color = colors_densities[round(Density,1)], linewidth = size_lines)
-            #limitation of data along y
-            if atoms.index(atom) == 0:
-                ax.autoscale(axis='y', tight=True)
-                limits[temperature] = ax.get_ylim()
-            ax.set_ylim(limits[temperature])
+            lines[str(round(Density,1))], = ax.plot(Temps,DataAtom,'-', 
+                  color = colors_densities[round(Density,1)], linewidth = size_lines)            
             #we add x and y labels outside the plot on the right columns and lines
             if T_numsubplot.index(temperature) == 0:
                 ax.set_xlabel(atoms[atoms.index(atom)], fontweight = 'bold', fontsize = size_fonts)
                 ax.xaxis.set_label_position('top')
             if atoms.index(atom) == len(atoms)-1:
-                ax.set_ylabel(str(int(float(temperature.strip('T'))*1000))+' K', fontweight = 'bold', fontsize = size_fonts)
+                ax.set_ylabel(str(int(float(temperature.strip('T'))*1000))+' K',
+                              fontweight = 'bold', fontsize = size_fonts)
                 ax.yaxis.set_label_position('right')
+            #limitation of data along x and ticks (linear only)
+            Xlimit = 9999
+            #major_ticks = np.arange(0, Xlimit, 2000) 
+            #minor_ticks = np.arange(0, Xlimit, 500)
+            #ax.set_xticks(major_ticks)
+            #ax.set_xticks(minor_ticks, minor=True)
+            ax.set_xscale('log')
+            ax.set_xlim(10,Xlimit)
+            #limitation of data along y
+            ax.set_yscale('log')            
+            if atoms.index(atom) == 0:
+                ax.autoscale(axis='y', tight=True)
+                limits[temperature] = (0.100001,ax.get_ylim()[1])
+            ax.set_ylim(limits[temperature])
             #we make the graph prettier
             if  atoms.index(atom) != 0:
                 plt.setp(ax.get_yticklabels(), visible=False)
             if T_numsubplot.index(temperature) != len(T_numsubplot)-1:
-                plt.setp(ax.get_xticklabels(), visible=False)
-            major_ticks = np.arange(0, Xlimit, 2000) 
-            minor_ticks = np.arange(0, Xlimit, 500)
-            ax.set_xticks(major_ticks)
-            ax.set_xticks(minor_ticks, minor=True)
+                plt.setp(ax.get_xticklabels(), visible=False)                
             ax.xaxis.set_ticks_position('both')
             ax.yaxis.set_ticks_position('both')
             ax.yaxis.set_tick_params(which = 'both', direction='inout')
             ax.xaxis.set_tick_params(which = 'both', direction='inout')
-            ax.grid(axis = 'y', which = 'major', linestyle = '--', linewidth = size_lines/2, alpha = 0.5)
+            ax.grid(axis = 'y', which = 'major', linestyle = '--', 
+                    linewidth = size_lines/2, alpha = 0.5)
+            ax.set_facecolor((1,1,1,0))
             #ax.get_xaxis().set_tick_params(direction='inout')
             #ax.get_yaxis().set_tick_params(direction='inout')
             #plt.setp(ax.get_xticklabels()[-2], visible=False)
             #plt.setp(ax.get_yticklabels()[-1], visible=False)
             ax.tick_params(which = 'both', labelsize = size_fonts_ticks, width = size_lines/2)
-    # Fine-tune figure
+    
+    #************ Fine tune figure
     ax0 = fig.add_subplot(111, frameon=False)
-    custom_lines = [Line2D([0],[0],color = colors_densities[key], ls = '-', marker = '', linewidth = size_lines/2) for key in natsort.natsorted(colors_densities)]
-    #legend = plt.legend([line for line in custom_lines],[label for label in natsort.natsorted(colors_densities)],title = '$\\bf{Density}$ \n (g.cm$^{-3}$)', bbox_to_anchor=(1.05, 1), loc=2, fontsize = size_fonts, borderaxespad=0.)
-    legend = plt.legend([line for line in custom_lines],[label for label in natsort.natsorted(colors_densities)],title = '$\\bf{Density}$ (g.cm$^{-3}$)', bbox_to_anchor=(0.5, 1.04), loc='lower center', fontsize = size_fonts, borderaxespad=0.,ncol=10)
-    plt.setp(legend.get_title(),fontsize = size_fonts)
-
-#    s = [(k, lines[k]) for k in sorted(lines.keys())]
-#    ax0.legend([v for k,v in s],[k for k,v in s], title = ' $\\bf{density}$ \n (g.cm$^{-3}$)',bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, labelleft=False, left=False, labelright = False, right=False)
+    plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, 
+                    labelleft=False, left=False, labelright = False, right=False)
     ax0.set_xlabel(r'Time (fs)', fontweight = 'bold', fontsize = size_fonts, labelpad = shift_label)
-    ax0.set_ylabel(r"Mean square displacement ($\mathregular{\AA^2}$)",fontsize = size_fonts,fontweight='bold', labelpad = shift_label + shift_label/2)
+    ax0.set_ylabel(r"Mean square displacement ($\mathregular{\AA^2}$)",
+                   fontsize = size_fonts,fontweight='bold', labelpad = shift_label + shift_label/2)
+
+    #************ legend
+    ncols = 12
+    custom_lines = [Line2D([0],[0],color = colors_densities[key], ls = '-', 
+                           marker = '', linewidth = size_lines) for key in allrho[:ncols]]
+    legend = ax0.legend([col for col in custom_lines],[label for label in allrho[:ncols]],
+                        title = '$\\bf{Density}$ (g.cm$^{-3}$)', bbox_to_anchor=(0.5, 1.05), 
+                        loc="lower center", fontsize = size_fonts,  borderaxespad=0., ncol=ncols)
+    custom_lines = [Line2D([0],[0],color = colors_densities[key], ls = '-', marker = '', 
+                           linewidth = size_lines) for key in allrho[ncols:]]
+    legend2 = ax0.legend([col for col in custom_lines],[label for label in allrho[ncols:]],
+                         bbox_to_anchor=(0.5, 1.05), loc="upper center", fontsize = size_fonts,  borderaxespad=0., ncol=ncols)
+    ax0.add_artist(legend)
+    plt.setp(legend.get_title(),fontsize= size_fonts)
     
     figurename = 'msd_'+file.split('_')[0]+'.pdf'
     plt.savefig(figurename, bbox_inches='tight', dpi = 300)

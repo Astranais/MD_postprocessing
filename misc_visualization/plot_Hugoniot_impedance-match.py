@@ -63,7 +63,8 @@ def creation_plot_Hug(plot_parameters,variable):
     if variable == 'T':
         ax.set_xlabel(r"Temperature (K)", fontweight = 'bold', fontsize = size_fonts)
     else:
-        ax.set_xlabel(r'Density (kg.m$^{-3}$)', fontweight = 'bold', fontsize = size_fonts, labelpad = shift_labelpad)
+        ax.set_xlabel(r'Density (kg.m$^{-3}$)', fontweight = 'bold', 
+                      fontsize = size_fonts, labelpad = shift_labelpad)
     return fig, ax
 
 
@@ -98,7 +99,8 @@ def creation_plot(plot_parameters):
     #ax.grid(True, which='both',axis = 'x', )
     ax.tick_params(which = 'both', labelsize = size_font_ticks, width = size_lines/2)
     #labels
-    ax.set_xlabel(r'Particle velocity (km/s)', fontweight = 'bold', fontsize = size_fonts, labelpad = shift_labelpad)
+    ax.set_xlabel(r'Particle velocity (km/s)', fontweight = 'bold', 
+                  fontsize = size_fonts, labelpad = shift_labelpad)
     ax.set_ylabel(r"Pressure (GPa)", fontweight = 'bold', fontsize = size_fonts)
     return fig, ax
 
@@ -159,7 +161,8 @@ def poly2(x,a,b,c):
 def main(argv):
     """     ********* Main program *********     """
     #parameters for the figure for article
-    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (4,4),"size_markers" : 4,"size_lines" : 1,"shift_labelpad" : 10}
+    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (4,4),
+                       "size_markers" : 4,"size_lines" : 1,"shift_labelpad" : 10}
     #other dictionnaries and parameters for the figure
     Up_shock = [] #Up of shock = intersection of linear regression or poly2 fits
     P_shock = []  #P of shock
@@ -231,7 +234,8 @@ def main(argv):
         XT = np.arange(0,20000,1000)
         #extraction, plot, fit of data and determination of intersection
         try:
-            T, rho,P, Up_crust = np.loadtxt(file,delimiter = '\t', skiprows = 2, usecols = (0,1,2,8), unpack =True)
+            T, rho,P, Up_crust = np.loadtxt(file,delimiter = '\t', skiprows = 2,
+                                            usecols = (0,1,2,8), unpack =True)
         except ValueError:
             print("Check your file",file,"there are missing data, skipping this file")
             continue        
@@ -257,7 +261,9 @@ def main(argv):
         else: 
             color = '0.5'            
         ax.plot(Up_crust, P, 'o', color = color)
-        ax.text(0.015,0.945, letters[0] , transform=ax.transAxes, horizontalalignment = 'left', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], bbox=dict(facecolor='w', edgecolor='k', pad=3.0))
+        ax.text(0.015,0.945, letters[0] , transform=ax.transAxes, horizontalalignment = 'left', 
+                fontweight = 'bold', fontsize = plot_parameters["size_fonts"], 
+                bbox=dict(facecolor='w', edgecolor='k', pad=3.0))
         #linear fit
         #s_crust, int_crust, r_crust, p_crust, stderr_crust = linregress(Up_crust[4:],P[4:])
         #ax.plot(XUp, s_crust*XUp+int_crust, '--', color = '0.5')
@@ -269,7 +275,8 @@ def main(argv):
         c_crust = np.full(6, popt_crust[2])
         for ii in range(6):
             try: 
-                P_imp, Up_imp =  np.loadtxt(impactor_Hugoniot_filename,delimiter = '\t', skiprows = 2, usecols = (2,ii+9), unpack = True)
+                P_imp, Up_imp =  np.loadtxt(impactor_Hugoniot_filename,delimiter = '\t',
+                                            skiprows = 2, usecols = (2,ii+9), unpack = True)
                 #print("Using the Hugoniot of the impactor for impedance match")
             except ValueError:
                 print("Check your file",impactor_Hugoniot_filename ,"there are missing data, skipping this file")
@@ -277,12 +284,16 @@ def main(argv):
                 break
             except UnboundLocalError:
                 print("Hugoniot of the impactor not found, we use the Hugoniot of the same material")
-                P_imp, Up_imp =  np.loadtxt(file,delimiter = '\t', skiprows = 2, usecols = (2,ii+9), unpack = True)
+                P_imp, Up_imp =  np.loadtxt(file,delimiter = '\t', skiprows = 2, 
+                                            usecols = (2,ii+9), unpack = True)
             #impedance match using linear regression of the last data
             #Up_shock, PShock, P_shock = impedance_match_linear(ax, ii, Up_imp, P_imp, colors, XUp, int_crust, s_crust, Up_shock, P_shock)
             #impedance match using 2nd order polynomial of all data
             XUp = np.arange(0, U_impactor[ii]+0.1,0.1)
-            Up_shock, PShock, P_shock,  a_imp, b_imp, c_imp = impedance_match_poly(ax, ii, Up_imp, P_imp, colors, XUp, popt_crust, Up_shock, P_shock,  a_imp, b_imp, c_imp)
+            Up_shock, PShock, P_shock,  a_imp, b_imp, c_imp = impedance_match_poly(ax, ii, Up_imp, P_imp, 
+                                                                                   colors, XUp, popt_crust, 
+                                                                                   Up_shock, P_shock, 
+                                                                                   a_imp, b_imp, c_imp)
             #***** We obtain corresponding rho and T shock using the Hugoniot values (we draw a line between the two points around the Pshock)
             #first we check of the shock pressure is among the hugoniot values
             index = -1
@@ -308,7 +319,7 @@ def main(argv):
             
         if exiting == 1:
             continue
-        extension =  '.svg'
+        extension =  '.pdf'
         figurename = figurename + extension
         figurename2 = figurename2 + extension        
         figurename3 = figurename3 + extension
@@ -318,8 +329,8 @@ def main(argv):
             nf.write(str(round(rho_shock[ii]))+'\t'+str(round(T_shock[ii]))+'\t'+str(round(P_shock[ii]))+'\t'+str(round(Up_shock[ii],2))+'\t'+str(round(U_impactor[ii],2))+'\t'+str(a_imp[ii])+'\t'+str(b_imp[ii])+'\t'+str(c_imp[ii])+'\t'+str(a_crust[ii])+'\t'+str(b_crust[ii])+'\t'+str(c_crust[ii])+'\n' )
         print("file saved with name ",newfilename)
         fig.savefig(figurename, bbox_inches = 'tight', dpi = 150)
-        #fig2.savefig(figurename2, bbox_inches = 'tight', dpi = 150)
-        #fig3.savefig(figurename3, bbox_inches = 'tight', dpi = 150)
+        fig2.savefig(figurename2, bbox_inches = 'tight', dpi = 150)
+        fig3.savefig(figurename3, bbox_inches = 'tight', dpi = 150)
         
         #*********** Plot the figure for the article
         #** extraction of data
@@ -381,23 +392,40 @@ def main(argv):
             line = ':'
     #** plot the article figure
     #plot the crust
-    ax4.plot(XUp, poly2(XUp, *params_2700), linestyle = line, linewidth = plot_parameters['size_lines'], color = color_2700)
-    ax4.plot(XUp, poly2(XUp, *params_2600), linestyle = line, linewidth = plot_parameters['size_lines'], color = color_2600)
-    ax4.plot(XUp, poly2(XUp, *params_2500), linestyle = line, linewidth = plot_parameters['size_lines'], color = color_2500)
-    ax4.plot(XUp, poly2(XUp, *params_1932), linestyle = line, linewidth = plot_parameters['size_lines'], color = color_1932)
-    ax4.plot(XUp, poly2(XUp, *params_3000), linestyle = line, linewidth = plot_parameters['size_lines'], color = color_3000)
+    ax4.plot(XUp, poly2(XUp, *params_2700), linestyle = line, 
+             linewidth = plot_parameters['size_lines'], color = color_2700)
+    ax4.plot(XUp, poly2(XUp, *params_2600), linestyle = line, 
+             linewidth = plot_parameters['size_lines'], color = color_2600)
+    ax4.plot(XUp, poly2(XUp, *params_2500), linestyle = line, 
+             linewidth = plot_parameters['size_lines'], color = color_2500)
+    ax4.plot(XUp, poly2(XUp, *params_1932), linestyle = line, 
+             linewidth = plot_parameters['size_lines'], color = color_1932)
+    ax4.plot(XUp, poly2(XUp, *params_3000), linestyle = line, 
+             linewidth = plot_parameters['size_lines'], color = color_3000)
     for ii in range(len(markertype)):
         XUp = np.arange(0, U_impactor[ii]+0.1,0.1)
         #plot the impactors curves
         ax4.plot(XUp, poly2(XUp, a_imp[ii], b_imp[ii], c_imp[ii]), linestyle = line, color = colors[ii])
         #plot the peak shock
-        ax4.plot(Up_shock_2700[ii], P_shock_2700[ii], ls = '',  marker = markertype[ii], markersize = plot_parameters["size_markers"]+2, markeredgecolor = color_2700, color = 'none',  markeredgewidth = 0.5,  markerfacecolor = colorfill_2700)
-        ax4.plot(Up_shock_2600[ii], P_shock_2600[ii], ls = '',  marker = markertype[ii], markersize = plot_parameters["size_markers"]+2, markeredgecolor = color_2600, color = 'none',  markeredgewidth = 0.5,  markerfacecolor = colorfill_2600)
-        ax4.plot(Up_shock_2500[ii], P_shock_2500[ii], ls = '',  marker = markertype[ii], markersize = plot_parameters["size_markers"]+2, markeredgecolor = color_2500, color = 'none',  markeredgewidth = 0.5,  markerfacecolor = colorfill_2500)
-        ax4.plot(Up_shock_1932[ii], P_shock_1932[ii], ls = '',  marker = markertype[ii], markersize = plot_parameters["size_markers"]+2, markeredgecolor = color_1932, color = 'none',  markeredgewidth = 0.5,  markerfacecolor = colorfill_1932)
-        ax4.plot(Up_shock_3000[ii], P_shock_3000[ii], ls = '',  marker = markertype[ii], markersize = plot_parameters["size_markers"]+2, markeredgecolor = color_3000, color = 'none',  markeredgewidth = 0.5,  markerfacecolor = colorfill_3000)
+        ax4.plot(Up_shock_2700[ii], P_shock_2700[ii], ls = '',  marker = markertype[ii], 
+                 markersize = plot_parameters["size_markers"]+2, markeredgecolor = color_2700, 
+                 color = 'none',  markeredgewidth = 0.5,  markerfacecolor = colorfill_2700)
+        ax4.plot(Up_shock_2600[ii], P_shock_2600[ii], ls = '',  marker = markertype[ii], 
+                 markersize = plot_parameters["size_markers"]+2, markeredgecolor = color_2600, 
+                 color = 'none',  markeredgewidth = 0.5,  markerfacecolor = colorfill_2600)
+        ax4.plot(Up_shock_2500[ii], P_shock_2500[ii], ls = '',  marker = markertype[ii], 
+                 markersize = plot_parameters["size_markers"]+2, markeredgecolor = color_2500, 
+                 color = 'none',  markeredgewidth = 0.5,  markerfacecolor = colorfill_2500)
+        ax4.plot(Up_shock_1932[ii], P_shock_1932[ii], ls = '',  marker = markertype[ii], 
+                 markersize = plot_parameters["size_markers"]+2, markeredgecolor = color_1932, 
+                 color = 'none',  markeredgewidth = 0.5,  markerfacecolor = colorfill_1932)
+        ax4.plot(Up_shock_3000[ii], P_shock_3000[ii], ls = '',  marker = markertype[ii], 
+                 markersize = plot_parameters["size_markers"]+2, markeredgecolor = color_3000, 
+                 color = 'none',  markeredgewidth = 0.5,  markerfacecolor = colorfill_3000)
     #letter
-    ax4.text(0.015,0.945, letters[1] , transform=ax4.transAxes, horizontalalignment = 'left', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], bbox=dict(facecolor='w', edgecolor='k', pad=3.0))
+    ax4.text(0.015,0.945, letters[1] , transform=ax4.transAxes, horizontalalignment = 'left', 
+             fontweight = 'bold', fontsize = plot_parameters["size_fonts"], 
+             bbox=dict(facecolor='w', edgecolor='k', pad=3.0))
     #save
     figurename4 = figurename4 + extension
     print("figure saved with name ",figurename4)

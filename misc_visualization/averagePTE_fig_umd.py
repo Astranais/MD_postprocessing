@@ -51,7 +51,7 @@ def grep_pattern(FileName, Pattern, SkipSteps):
 
 def plot_function(name,ax,data,average,stdev):
     bleuspecial = '#00ccff'
-    yellowcolors = ['#ffe680','#ffc900','#dbae00','#b28f00','#4e3f00'] #colors for impactor velocities above -  yellow shades
+    yellowcolors = ['#ffe680','#ffc900','#dbae00','#b28f00','#4e3f00'] #  yellow shades
     x=np.arange(1,len(data)+1,1)
     if name == "Pressure":
         unit = "GPa"

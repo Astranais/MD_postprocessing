@@ -161,13 +161,15 @@ def creation_plot2(variable, file1, file2, MN, plot_parameters,max_den,letter):
         axis.yaxis.set_ticks_position('both')
         axis.tick_params(which = 'both', labelsize = size_font_ticks, width = size_lines/2)
         axis.grid(True, which='major',axis = 'y', linestyle=':', linewidth=size_lines/2 )
+        axis.set_facecolor((1,1,1,0))
                 
     ax.set_ylim(0,1)
     #Fine-tune figure and addition of a title per graph
     temp1, acell1 = split_name(file1)
     temp2, acell2 = split_name(file2)
     ax0 = fig.add_subplot(111, frameon=False)
-    plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, labelleft=False, left=False, labelright = False, right=False)
+    plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, 
+                    labelleft=False, left=False, labelright = False, right=False)
     if variable == 'rho':
         major_xticks = np.arange(0, 7, 0.1) 
         minor_xticks = np.arange(0, 7, 0.05)    
@@ -177,7 +179,8 @@ def creation_plot2(variable, file1, file2, MN, plot_parameters,max_den,letter):
             axis.xaxis.set_ticks_position('both')
             ax.tick_params(which = 'both', labelsize = size_font_ticks, width = size_lines/2)
             axis.set_xlim(1,max_den)
-        ax0.set_xlabel(r"Density (g.cm$^{-3}$)", fontweight = 'bold', fontsize = size_fonts , labelpad = shift_labelpad)
+        ax0.set_xlabel(r"Density (g.cm$^{-3}$)", fontweight = 'bold', 
+                       fontsize = size_fonts , labelpad = shift_labelpad)
         ax.set_xlabel(temp1+' K', fontweight = 'bold', fontsize = size_fonts )
         ax.xaxis.set_label_position('top')
         ax2.set_xlabel(temp2+' K', fontweight = 'bold', fontsize =size_fonts )
@@ -189,14 +192,19 @@ def creation_plot2(variable, file1, file2, MN, plot_parameters,max_den,letter):
             axis.xaxis.set_ticks_position('both')
             ax.tick_params(which = 'both', labelsize = size_font_ticks, width = size_lines/2)
             plt.autoscale(enable=True,axis='x',tight=False)
-        ax0.set_xlabel(r"Temperature (K)", fontweight = 'bold', fontsize = size_fonts , labelpad = shift_labelpad)
-        ax.set_xlabel(str(round(MN/(Na*float(acell1)**3*10**(-24)),2))+r' (g.cm$^{-3}$)', fontweight = 'bold', fontsize = size_fonts )
+        ax0.set_xlabel(r"Temperature (K)", fontweight = 'bold', 
+                       fontsize = size_fonts , labelpad = shift_labelpad)
+        ax.set_xlabel(str(round(MN/(Na*float(acell1)**3*10**(-24)),2))+r' (g.cm$^{-3}$)', 
+                      fontweight = 'bold', fontsize = size_fonts )
         ax.xaxis.set_label_position('top')
-        ax2.set_xlabel(str(round(MN/(Na*float(acell2)**3*10**(-24)),2))+r' (g.cm$^{-3}$)', fontweight = 'bold', fontsize =size_fonts )
+        ax2.set_xlabel(str(round(MN/(Na*float(acell2)**3*10**(-24)),2))+r' (g.cm$^{-3}$)', 
+                       fontweight = 'bold', fontsize =size_fonts )
         ax2.xaxis.set_label_position('top')
         
     if letter != '':
-        ax.text(-0.18,0.99, letter , transform=ax.transAxes, horizontalalignment = 'left', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], bbox=dict(facecolor='none', edgecolor='k', pad=3.0))  
+        ax.text(-0.18,0.99, letter , transform=ax.transAxes, horizontalalignment = 'left', 
+                fontweight = 'bold', fontsize = plot_parameters["size_fonts"], 
+                bbox=dict(facecolor='none', edgecolor='k', pad=3.0))  
     
     return fig, ax, ax2
 
@@ -241,7 +249,9 @@ def creation_plot(variable,plot_parameters,max_den,letter):
     ax.set_ylim(0,1)
     
     if letter != '':
-        ax.text(-0.08,0.99, letter , transform=ax.transAxes, horizontalalignment = 'left', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], bbox=dict(facecolor='none', edgecolor='k', pad=3.0))  
+        ax.text(-0.08,0.99, letter , transform=ax.transAxes, horizontalalignment = 'left', 
+                fontweight = 'bold', fontsize = plot_parameters["size_fonts"], 
+                bbox=dict(facecolor='none', edgecolor='k', pad=3.0))  
         
     return fig,ax
 
@@ -253,7 +263,9 @@ def main(argv):
     colors_elem={'Al':'pink','C':'0.25','Ca':'c','H':'w','K':'m','Na':'b','O':'r','Si':'y'}  #other dictionnaries and parameters for the figure for article version
     letter = '' 
     statfile2 = ''
-    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (8,4),"size_markers" : 4,"size_lines" : 1,"shift_labelpad" : 20}
+    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (8,4),
+                       "size_markers" : 4,"size_lines" : 1,"shift_labelpad" : 20}
+    #plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (8,4),"size_markers" : 10,"size_lines" : 2,"shift_labelpad" : 20}
     #other parameters
     Na=6.022*10**23
     try:
@@ -310,9 +322,10 @@ def main(argv):
         fig, ax1 = creation_plot(variable,plot_parameters,max_den,letter)
         figurename = statfile1.split('.dat')[0]+'_'+variable  + '-elements'
     
-    for statfile in allstatfiles:
+    for ii in range(len(allstatfiles)):
+        statfile = allstatfiles[ii]
         #selection of the plot
-        if allstatfiles.index(statfile) == 1:
+        if ii == 1:
             ax = ax2
         else:
             ax = ax1
@@ -433,7 +446,9 @@ def main(argv):
             #sort the data by the x value
             x, y = zip(*sorted(zip( xdata[variable], perc[elem])))
             #plot lines
-            line, = ax.plot(x,y, '.--', color = colors_elem[elem], markersize = plot_parameters["size_markers"], linewidth = plot_parameters["size_lines"], label = elem)        
+            line, = ax.plot(x,y, '.--', color = colors_elem[elem], markersize = plot_parameters["size_markers"], 
+                            linewidth = plot_parameters["size_lines"], label = elem)        
+            label_line(ax, line, elem, halign='center')    
             #write data in file
             nf.write(elem + '\t' + '\t'.join(str(round(data,4)) for data in perc[elem]) + '\n')
             #for stackplot only
@@ -445,14 +460,15 @@ def main(argv):
         
         #plot lines of congruent gas
         for elem in congruent:
-            ax.axhline(y=congruent[elem], color = colors_elem[elem],  linewidth = plot_parameters["size_lines"]/1.5, linestyle = ':' )
+            ax.axhline(y=congruent[elem], color = colors_elem[elem],  
+                       linewidth = plot_parameters["size_lines"]/1.5, linestyle = ':' )
         
         
         #legend = plt.legend(bbox_to_anchor=(1.01, 1), loc='upper left', fontsize = plot_parameters["size_fonts"], title = '$\\bf{Elements}$', borderaxespad=0., ncol = 1)
         #plt.setp(legend.get_title(),fontsize= plot_parameters["size_fonts"])
         print(newfilename, 'is created')
         
-    figurename = figurename +'.png'
+    figurename = figurename +'.pdf'
     plt.savefig(figurename, bbox_inches='tight', dpi=300)
     print(figurename, 'is created')
 #    plt.show() # à mettre après savefig sinon on ne sauvegarde rien !!  

@@ -90,8 +90,10 @@ def smoothing_xmin(data,selected_pairs):
                     function=linear
                 else:
                     function=poly3
-                params[temp][atom_pair], pcov = curve_fit(function, newrho, newdata, p0=None, sigma=None, absolute_sigma=False )
-                chi2_reduced[temp][atom_pair]=chi2red(params[temp][atom_pair],data[temp]['rho'],data[temp]['dist'][atom_pair],function)
+                params[temp][atom_pair], pcov = curve_fit(function, newrho, 
+                      newdata, p0=None, sigma=None, absolute_sigma=False )
+                chi2_reduced[temp][atom_pair]=chi2red(params[temp][atom_pair],
+                            data[temp]['rho'],data[temp]['dist'][atom_pair],function)
             else:
                 print("Not enough data to fit any curve for atom pair ", atom_pair, " and temperature ", temp)
     #**** Compute the new xmin for each file and atom pair
@@ -134,15 +136,33 @@ def update_ylim(ylim_allT,list_atom_pairs):
         ylim_allT[atom_pair][1] = ylim_MO[1] 
     return ylim_allT
 
+def extract_TP(thermofile, column_number, TP, addtxt):
+    """extract temperature and pressure from thermofile"""
+    with open(thermofile, 'r') as f:
+        [f.readline() for i in range(3)]
+        #extract data
+        while True:
+            line = f.readline()
+            if not line: break
+            else:    
+                entry=line.split('\n')[0].split('\t')
+                TP[entry[0].split('outcar.umd.dat')[0].split('/')[-1]+addtxt] = (int(entry[column_number['T']]),float(entry[column_number['P']]))
+    return TP
+
 
 
 def main(argv):
     """     ********* Main program *********     """
     #other dictionnaries and parameters for the figure
     markers = ['o','^','*','P','X','<','>','v','8','s','p','h','+','D'] #************************************Be sure you have enough markers for all the pairs you want to plot
-    colors_T = {'T2':'#800080','T3':'#297fff','T4':'#00ff00','T4.5':'#bae200','T5':'#ffcd01','T5.5':'#ff6e00','T6':'#ff0101','T6.5':'#ff00a2','T7':'#ff01de','T7.5':'#ffa6f4','T10':'#ffe86e','T15':'#ffbf90','T20':'#ff7788'}
-    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (4,4),"size_markers" : 8,"size_lines" : 1,"shift_labelpad" : 20}
-    label = {'xmax':r"1st $g(r)$ peak location ($\AA$)",'xmin':r"Coordination sphere radius ($\AA$)",'bond':r"Bond length ($\AA$)"}
+    colors_T = {'T2':'#800080','T3':'#297fff','T4':'#00ff00','T4.5':'#bae200',
+                'T5':'#ffcd01','T5.5':'#ff6e00','T6':'#ff0101','T6.5':'#ff00a2',
+                'T7':'#ff01de','T7.5':'#ffa6f4','T10':'#ffe86e','T15':'#ffbf90','T20':'#ff7788'}
+    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (4,4),
+                       "size_markers" : 8,"size_lines" : 1,"shift_labelpad" : 20}
+    label = {'xmax':r"1st $g(r)$ peak location ($\AA$)",
+             'xmin':r"Coordination sphere radius ($\AA$)",
+             'bond':r"Bond length ($\AA$)"}
     #initialization of variables
     elements = ''
     number = ''
@@ -150,20 +170,29 @@ def main(argv):
     legend_labels = {} 
     data = {} #big dictionnary with inside dist dictionnary and rho, all coresponding to different T
     distance_columns = {'xmax':1,'xmin':3,'bond':5}
+    xvariable = 'rho'
+    TP = {} #dictionnary with P and T in each simufile
+    #dictionnary for fullaverages file in full version
+    column_number = {'rho':2,'P':5,'stdev_P':6,'err_P':7,'T':8,'stdev_T':9,
+                     'err_T':10,'E':14,'stdev_E':15,'err_E':16,'Cvm_Nkb':23,
+                     'stdev_Cvm_Nkb':24,'Cvm':25,'stdev_Cvm':26,'testCv':31,'stdev_testCv':32}
     #other parameters
     Na=6.022*10**23
     try:
-        options,arg = getopt.getopt(argv,"hf:g:j:a:d:",["fgofrsfilename1","gofrsfilename2","jgofrsfilename3","atom","distance"])
+        options,arg = getopt.getopt(argv,"hf:g:j:a:d:x:",["fgofrsfilename1",
+                                                          "gofrsfilename2","jgofrsfilename3",
+                                                          "atom","distance",'xvariable'])
     except getopt.GetoptError:
-        print("plot_distances_5x3.py -f <_gofrs.txt 1> -g <_gofrs.txt 2> -j <_gofrs.txt 3> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -d <distance type to print ('xmax' or 'xmin' or 'bond')>")
+        print("plot_distances_5x3.py -f <_gofrs.txt 1> -g <_gofrs.txt 2> -j <_gofrs.txt 3> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -d <distance type to print ('xmax' or 'xmin' or 'bond')> -x <xvariable (P or rho)>")
         sys.exit()
     for opt,arg in options:
         if opt == '-h':
             print('')
             print('plot_distances_5x3.py program to plot xmin,xmax or bond length as a function of density or acell for each T and 5  selected pairs of atoms')
-            print("plot_distances_5x3.py -f <_gofrs.txt 1> -g <_gofrs.txt 2> -j <_gofrs.txt 3> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -d <distance type to print ('xmax' or 'xmin' or 'bond')> ")
+            print("plot_distances_5x3.py -f <_gofrs.txt 1> -g <_gofrs.txt 2> -j <_gofrs.txt 3> -a <pairs of atoms>(ex: 'Ca-O,Ca-Ca,O2')  -d <distance type to print ('xmax' or 'xmin' or 'bond')> -x <xvariable (P or rho)> ")
             print("plot_distances_5x3.py requires _gofrs.txt file (use analyze_gofrs_semi_automatic.py)")
             print('')
+            print('For plots as function of P, make sure the files from fullaverages.py are in the current folder')
             print('WARNING: this script use the filenames inside the _gofrs.txt file to extract the temperature and cell size for the plot. If you do have both information in your filenames at the same place, then update the function split_name to extract them correctly.')
             sys.exit()
         if opt in ('-f','--gofrsfilename'):
@@ -176,9 +205,14 @@ def main(argv):
             atoms = arg.split(',')                      #list of atom pairs we want to analyze here
         elif opt in ('-d','--distance'):
             distance_type = str(arg)
+        elif opt in ('-x','--xvariable'):
+            xvariable = str(arg)
     files = [filename1,filename2,filename3]
     #******* write data analysis and find ymax, ymin for every atoms
-    ylim_allT = {'Ca-O':[9999,0],'K-O':[9999,0],'Na-O':[9999,0],'Al-O':[9999,0],'Si-O':[9999,0],'O-O':[9999,0],'O2':[9999,0],'Ca-Ca':[9999,0],'K-K':[9999,0],'Na-Na':[9999,0],'Ca-Al':[9999,0],'K-Al':[9999,0],'Na-Al':[9999,0],'Al-Al':[9999,0],'Al-Si':[9999,0],'Si-Si':[9999,0]}
+    ylim_allT = {'Ca-O':[9999,0],'K-O':[9999,0],'Na-O':[9999,0],'Al-O':[9999,0],
+                 'Si-O':[9999,0],'O-O':[9999,0],'O2':[9999,0],'Ca-Ca':[9999,0],
+                 'K-K':[9999,0],'Na-Na':[9999,0],'Ca-Al':[9999,0],'K-Al':[9999,0],
+                 'Na-Al':[9999,0],'Al-Al':[9999,0],'Al-Si':[9999,0],'Si-Si':[9999,0]}
     for filename in files:
         print('********Analysis',filename)
         #******* 1st step: read the header and extract all relevant informations
@@ -252,6 +286,7 @@ def main(argv):
                     data[temperature0]['file'].append(entry[0].split('/')[-1].split('.gofr.dat')[0])              #extract filename
                     #we replace the 0 (no data) by NaN
                     for i in range(len(selected_pairs)):
+                        print(selected_pairs[i])
                         if float(entry[selected_pairs[i][1]]) == 0.0:
                             data[temperature0]['dist'][selected_pairs[i][0]].append(float('nan'))
                         else:
@@ -326,6 +361,14 @@ def main(argv):
     fig, axes =  plt.subplots(nrows= 5, ncols =  3, figsize = (10,14))          
     plt.subplots_adjust(top = 0.97, bottom = 0.07, right = 0.89, left = 0.07, hspace = 0, wspace = 0)
     for filename in files:
+        #******* 0th step: extract P and T for each thermo file
+        if xvariable == 'P':
+            TP={}
+            mineralname = filename.split('_')[1]
+            thermofiles = sorted(glob.glob('thermo_'+mineralname+'*.txt'))
+            for file in thermofiles:
+                TP = extract_TP(file, column_number, TP,'')
+            #print(TP)
         #******* 1st step: read the header and extract all relevant informations
         #creation of elements and number lists and initialization of T
         skip_head = 0
@@ -364,7 +407,7 @@ def main(argv):
         #initialization of the dictionnaries containing the data
         #we create sub dictionnaries of the data dictionnary
         data = {}
-        data[temperature0] = {'file':[],'rho':[],'dist':{}}
+        data[temperature0] = {'file':[],'rho':[],'dist':{},'P':[]}
         selected_pairs = [] #pairs to analyze along with their column number
         for atom_pair in atoms:
             for i in range(0,len(unique_pairs)):    
@@ -387,7 +430,7 @@ def main(argv):
                     if temperature != temperature0:     #if we change T:
                         #we create sub dictionnaries of the data dictionnary  and we re-initialize the arrays
                         temperature0 = temperature
-                        data[temperature0] = {'file':[],'rho':[],'dist':{}}
+                        data[temperature0] = {'file':[],'rho':[],'dist':{},'P':[]}
                         for i in range(len(selected_pairs)):
                             data[temperature0]['dist'][selected_pairs[i][0]] = []
                     if MN ==0:
@@ -395,6 +438,8 @@ def main(argv):
                     else:
                         data[temperature0]['rho'].append(MN/(Na*float(acell)**3*10**(-24)))     #calculation density
                     data[temperature0]['file'].append(entry[0].split('/')[-1].split('.gofr.dat')[0])              #extract filename
+                    if xvariable == 'P':
+                        data[temperature0]['P'].append(TP[entry[0].split('outcar.gofr.dat')[0].split('/')[-1]][1])
                     #we replace the 0 (no data) by NaN
                     for i in range(len(selected_pairs)):
                         if float(entry[selected_pairs[i][1]]) == 0.0:
@@ -420,37 +465,54 @@ def main(argv):
             for temp in sorted(data): #loop over temperatures = key in data dictionnary
                 #print('******* for temperature:',temp)
                 #plot
-                ax.plot(data[temp]['rho'],data[temp]['dist'][atom_pair], '--',  color=colors_T[temp], linewidth = plot_parameters["size_lines"], marker = markers[unique_pairs.index(atom_pair)], markersize = plot_parameters["size_markers"])
+                ax.plot(data[temp][xvariable],data[temp]['dist'][atom_pair], '--', 
+                        color=colors_T[temp], linewidth = plot_parameters["size_lines"],
+                        marker = markers[unique_pairs.index(atom_pair)], markersize = plot_parameters["size_markers"])
     #            ax.text(1.025,0.5, atom_pair ,transform=ax.transAxes, fontsize=plot_parameters["size_fonts"], fontweight='bold')
-                ax.text(0.97,0.9, atom_pair, transform=ax.transAxes, horizontalalignment = 'right', fontsize=plot_parameters["size_fonts"], fontweight='bold')    
+                ax.text(0.97,0.9, atom_pair, transform=ax.transAxes, horizontalalignment = 'right',
+                        fontsize=plot_parameters["size_fonts"], fontweight='bold')    
             #Adjustment of ticks and make the graph prettier
-            if MN != 0:
+            if xvariable == 'P':
+                ax.set_xlim(1,275)
+                ax.set_xscale('log')
+            elif MN != 0:
                 ax.set_xticks(major_ticks)
                 ax.set_xticks(minor_ticks, minor=True)
+                ax.set_xlim(minrho,maxrho)
             else:
                 ax.xaxis.set_major_locator(major_ticks)
                 ax.xaxis.set_minor_locator(minor_ticks)    
+                ax.set_xlim(minrho,maxrho)
+            ax.set_facecolor((1,1,1,0))
             ax.xaxis.set_ticks_position('both')
             ax.yaxis.set_ticks_position('both')
             majorLocator = AutoLocator()
             minorLocator = AutoMinorLocator()
             ax.yaxis.set_major_locator(majorLocator)
-            ax.yaxis.set_minor_locator(minorLocator)                
-            ax.set_xlim(minrho,maxrho)
+            ax.yaxis.set_minor_locator(minorLocator)                            
             ax.set_ylim(ylim_allT[atom_pair][0],ylim_allT[atom_pair][1])
             if  unique_pairs.index(atom_pair) != len(unique_pairs)-1:
                 plt.setp(ax.get_xticklabels(), visible=False)
             if  files.index(filename) != 0:
                 plt.setp(ax.get_yticklabels(), visible=False)
-            ax.tick_params(which = 'both', labelsize = plot_parameters["size_font_ticks"], width = plot_parameters["size_lines"]/2)   
+            ax.tick_params(which = 'both', labelsize = plot_parameters["size_font_ticks"], 
+                           width = plot_parameters["size_lines"]/2)   
     # Fine-tune figure
     ax0 = fig.add_subplot(111, frameon=False) 
-    plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, labelleft=False, left=False, labelright=False, right=False)
-    if MN != 0:
-        ax0.set_xlabel(r'Density (g.cm$^{-3}$)', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], labelpad = plot_parameters["shift_labelpad"])
+    plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, 
+                    labelleft=False, left=False, labelright=False, right=False)
+    if xvariable == 'P':
+        ax0.set_xlabel(r'Pressure (GPa)', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], 
+                       labelpad = plot_parameters["shift_labelpad"])
+    elif MN != 0:
+        ax0.set_xlabel(r'Density (g.cm$^{-3}$)', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], 
+                       labelpad = plot_parameters["shift_labelpad"])
     else:
-        ax0.set_xlabel(r'Cell size ($\AA$)', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], labelpad = plot_parameters["shift_labelpad"])    
-    ax0.set_ylabel(label[distance_type],fontsize=plot_parameters["size_fonts"],fontweight='bold', labelpad = plot_parameters["shift_labelpad"]+plot_parameters["shift_labelpad"]/1.3)
+        xvariable = 'acell'
+        ax0.set_xlabel(r'Cell size ($\AA$)', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], 
+                       labelpad = plot_parameters["shift_labelpad"])    
+    ax0.set_ylabel(label[distance_type],fontsize=plot_parameters["size_fonts"],fontweight='bold', 
+                   labelpad = plot_parameters["shift_labelpad"]+plot_parameters["shift_labelpad"]/1.3)
     #Legend 
     for temp in data: 
         legend_labels[str(int(float(temp.strip('T'))*1000))] =  mpatches.Patch(color=colors_T[temp])
@@ -462,7 +524,7 @@ def main(argv):
     string = ''
     for atom_pair in atoms:
         string = string+'_'+atom_pair
-    figurename = 'distance_'+distance_type+'_all'+string+'.pdf'
+    figurename = 'distance_'+distance_type+'_all'+string+'_'+xvariable+'.pdf'
     fig.savefig(figurename, bbox_inches = 'tight', dpi = 150)
     print(figurename, '   created')
     #plt.show()

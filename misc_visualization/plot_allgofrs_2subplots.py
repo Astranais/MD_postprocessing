@@ -18,7 +18,23 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter,AutoLocator,AutoMinorLocator
 import crystallography as cr
 import natsort
+from matplotlib.colors import LinearSegmentedColormap
 
+
+
+
+def create_colors():
+    """ function to create the colors_T dictionnary from color map """
+    colors_T = {}
+    cm_data = np.loadtxt("/Users/akobsch/Dropbox/Recherche/PhD-MD-silicates/simulations/scripts/Analysis/ScientificColourMaps6/romaO/romaO.txt")
+    cm_data = cm_data[::-1] #for reverse colors
+    new_map = LinearSegmentedColormap.from_list('new', cm_data)
+    temperatures = ['T2','T2.5','T3','T3.5','T4','T4.5','T5','T5.5','T6','T6.5','T7','T7.5','T7.7']
+    color = iter(new_map(np.linspace(0,1,len(temperatures)))) #Creation of the color list    
+    for T in temperatures:
+        c = next(color)
+        colors_T[T] = c    
+    return colors_T
 
 
 
@@ -27,12 +43,12 @@ def split_name(filename):
     # *********** My filename are in the format CaAl2Si2O8_T3_nvt_a12.0.outcar.gofr.dat
     # ******* so I can split their name with _ and tale the acell and T from their name
     # **** Then change these two lines in harmony with your filename
-    temperature = str(round(float(filename.split('_')[1].strip('T'))*1000))                    #I extract the corresponding temperature
+    temperature = filename.split('_')[1]      #I extract the corresponding temperature
     acell = filename.split('.outcar.gofr.dat')[0].split('_')[3].strip('a')   #I extract the corresponding acell
     return temperature, acell
 
 
-def creation_plot(plot_parameters):
+def creation_plot(plot_parameters,atom_couple):
     """     ********** Creation of the plot  **********    """
     print("I use creation plot without insert")
     #parameters for article format
@@ -57,7 +73,7 @@ def creation_plot(plot_parameters):
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))  #set one decimal to ticks label``  
         plt.autoscale(enable=True,axis='y',tight=False)
         ax.yaxis.set_ticks_position('both')
-        ax.set_ylabel('g(r)', fontsize=size_fonts, fontweight = 'bold', labelpad = shift_labelpad)
+        ax.set_ylabel(r'g$_{\mathrm{\bf'+atom_couple+'}}$(r)', fontsize=size_fonts, fontweight = 'bold', labelpad = shift_labelpad)
         
         ax.set_xticks(major_xticks)
         ax.set_xticks(minor_xticks, minor=True) 
@@ -70,7 +86,7 @@ def creation_plot(plot_parameters):
     return fig, ax1, ax2
 
 
-def creation_plot_insert(plot_parameters):
+def creation_plot_insert(plot_parameters,atom_couple):
     """     ********** Creation of the plot  **********    """
     print("I use creation plot with insert")
     #parameters for article format
@@ -95,7 +111,7 @@ def creation_plot_insert(plot_parameters):
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))  #set one decimal to ticks label``  
         plt.autoscale(enable=True,axis='y',tight=False)
         ax.yaxis.set_ticks_position('both')
-        ax.set_ylabel('g(r)', fontsize=size_fonts, fontweight = 'bold', labelpad = shift_labelpad)
+        ax.set_ylabel(r'g$_{\mathrm{\bf'+atom_couple+'}}$(r)', fontsize=size_fonts, fontweight = 'bold', labelpad = shift_labelpad)
         
         ax.set_xticks(major_xticks)
         ax.set_xticks(minor_xticks, minor=True) 
@@ -137,8 +153,9 @@ def creation_plot_insert(plot_parameters):
     return fig, ax1, ax2, ax11, ax22
 
 
-
-
+def format_T(temperature):
+    T = str(round(float(temperature.strip('T'))*1000))              
+    return T
 
 def extraction(file, indexcol):
     """ extraction of data """
@@ -150,17 +167,20 @@ def extraction(file, indexcol):
 def main(argv):
     """     ********* Main program *********     """
     #parameters for the figure for article
-    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (8,4),"size_markers" : 4,"size_lines" : 1,"shift_labelpad" : 5}
+    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (10,4),"size_markers" : 4,"size_lines" : 1,"shift_labelpad" : 5}
     #other dictionnaries and parameters for the figure
     lines = {}   #dictionnary for the lines for legend
     Na=6.022*10**23  #avogadro constant
     #other dictionnaries and parameters for the figure
     colors_densities = {}
-    colors_temperatures = {'2000':'#800080','3000':'#297fff','4000':'#00ff00','4500':'#bae200','5000':'#ffcd01','6000':'#ff0101','7000':'#ff01de'}
+    colors_T = {'T2':'#800080','T3':'#297fff','T4':'#00ff00','T4.5':'#bae200','T5':'#ffcd01','T6':'#ff0101','T6.5':'#ff00a2','T7':'#ff01de'}
+    #colors_T = create_colors()
+    allT = {} #dictionnary for the legend
+    letters = ['a','b']
     try:
-        options,arg = getopt.getopt(argv,"hm:a:v:f:g:",["mineralfile","atoms","variable","folder1","gfolder2"])
+        options,arg = getopt.getopt(argv,"hm:a:v:f:g:l:",["mineralfile","atoms","variable","folder1","gfolder2","letters"])
     except getopt.GetoptError:
-        print("plot_allgofrs_2subplots.py  -m <mineralfile>  -a <1 couple of atoms>(ex: 'O-O') -v <variable for colors (rho,T)> -f <folder 1> -g <folder 2>")
+        print("plot_allgofrs_2subplots.py  -m <mineralfile>  -a <1 couple of atoms>(ex: 'O-O') -v <variable for colors (rho,T)> -f <folder 1> -g <folder 2> -l <two letters>")
         sys.exit()
     for opt,arg in options:
         if opt == '-h':
@@ -169,7 +189,7 @@ def main(argv):
             print("WARNING!!!!!")
             print("plot_allgofrs_2subplots.py requires to have separated folders of T and acell in order to plot all the files from the 2 T folders or from the 2 acell folders")
             print("")
-            print("plot_allgofrs_2subplots.py -m <mineral>  -a <1 couple of atoms>(ex: 'O-O') -v <variable for colors (rho,T)>  -f <folder 1> -g <folder 2>")
+            print("plot_allgofrs_2subplots.py -m <mineralfile>  -a <1 couple of atoms>(ex: 'O-O') -v <variable for colors (rho,T)>  -f <folder 1> -g <folder 2> -l <two letters>")
             print("")
             sys.exit()
         elif opt in ("-a", "--atoms"):
@@ -182,6 +202,8 @@ def main(argv):
             folder1 = str(arg).split('/')[0]
         elif opt in ("-g","--gfolder2"):
             folder2 = str(arg).split('/')[0]
+        elif opt in ("-l","--letters"):
+            letters = arg.split(',')
     #***** Calculation of the molecular mass
     with open(mineralfile,'r') as mf:
         entry = mf.readline()
@@ -218,7 +240,7 @@ def main(argv):
             list_densities.append(key) #list usefull if we want to plot the value of densities near to the lines, see plot_speciation_r0
         print(list_densities, "densities list for color bar. If you don't want densities but temperatures, please change the variable option to T")
     else:
-        print([key for key in colors_temperatures], "temperature list for color bar. If you don't want temperatures but densities, please change the variable option to rho")
+        print([key for key in colors_T], "temperature list for color bar. If you don't want temperatures but densities, please change the variable option to rho")
     #*****************************
     #*******************
     #*******
@@ -233,7 +255,7 @@ def main(argv):
     for couple in couples:
         if (couple == atom_couple):
             if atom_couple == 'O-O':
-                fig, ax1, ax2, ax11, ax22 = creation_plot_insert(plot_parameters)
+                fig, ax1, ax2, ax11, ax22 = creation_plot_insert(plot_parameters,atom_couple)
                 indexcol = couples.index(couple) + col + 1
                 if variable == 'rho':
                     for file in files1:
@@ -263,18 +285,18 @@ def main(argv):
                         #extraction of key for color legend 
                         temperature, acell = split_name(file)
                         #plot
-                        lines[temperature], = ax1.plot(distance,gofr, color = colors_temperatures[temperature], linewidth=plot_parameters['size_lines'])
-                        ax11.plot(distance,gofr, color = colors_temperatures[temperature],linewidth=plot_parameters['size_lines'])
+                        lines[format_T(temperature)], = ax1.plot(distance,gofr, color = colors_T[temperature], linewidth=plot_parameters['size_lines'])
+                        ax11.plot(distance,gofr, color = colors_T[temperature],linewidth=plot_parameters['size_lines'])
                     for file in files2:
                         #extraction of data
                         distance, gofr = extraction(file, indexcol)
                         #extraction of key for color legend 
                         temperature, acell = split_name(file)
                         #plot
-                        lines[temperature], = ax2.plot(distance,gofr, color = colors_temperatures[temperature], linewidth=plot_parameters['size_lines'])
-                        ax22.plot(distance,gofr, color = colors_temperatures[temperature],linewidth=plot_parameters['size_lines'])
+                        lines[format_T(temperature)], = ax2.plot(distance,gofr, color = colors_T[temperature], linewidth=plot_parameters['size_lines'])
+                        ax22.plot(distance,gofr, color = colors_T[temperature],linewidth=plot_parameters['size_lines'])
             else: #atom_couple != O-O
-                fig, ax1, ax2 = creation_plot(plot_parameters)
+                fig, ax1, ax2 = creation_plot(plot_parameters,atom_couple)
                 indexcol = couples.index(couple) + col + 1
                 if variable == 'rho':
                     for file in files1:
@@ -302,18 +324,18 @@ def main(argv):
                         #extraction of key for color legend 
                         temperature, acell = split_name(file)
                         #plot
-                        lines[temperature], = ax1.plot(distance,gofr, color = colors_temperatures[temperature], linewidth=plot_parameters['size_lines'])
+                        lines[format_T(temperature)], = ax1.plot(distance,gofr, color = colors_T[temperature], linewidth=plot_parameters['size_lines'])
                     for file in files2:
                         #extraction of data
                         distance, gofr = extraction(file, indexcol)
                         #extraction of key for color legend 
                         temperature, acell = split_name(file)
                         #plot
-                        lines[temperature], = ax2.plot(distance,gofr, color = colors_temperatures[temperature], linewidth=plot_parameters['size_lines'])
+                        lines[format_T(temperature)], = ax2.plot(distance,gofr, color = colors_T[temperature], linewidth=plot_parameters['size_lines'])
         col +=1        
     #article letter
-    ax1.text(0.055,0.95, 'a' , transform=ax1.transAxes, horizontalalignment = 'right', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], bbox=dict(facecolor='none', edgecolor='k', pad=3.0))                
-    ax2.text(0.055,0.95, 'b' , transform=ax2.transAxes, horizontalalignment = 'right', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], bbox=dict(facecolor='none', edgecolor='k', pad=3.0))    
+    ax1.text(0.012,0.985, letters[0] , transform=ax1.transAxes, verticalalignment = 'top', horizontalalignment = 'left', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], bbox=dict(facecolor='none', edgecolor='k', pad=3.0))                
+    ax2.text(0.012,0.985, letters[1] , transform=ax2.transAxes, verticalalignment = 'top', horizontalalignment = 'left', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], bbox=dict(facecolor='none', edgecolor='k', pad=3.0))    
     # Legend
     ax0 = fig.add_subplot(111, frameon=False)
     plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, labelleft=False, left=False, labelright = False, right=False)
@@ -321,9 +343,14 @@ def main(argv):
     if variable == 'rho':
         title_legend=' $\\bf{Density}$ \n (g.cm$^{-3}$)'
     else:
-        title_legend=' $\\bf{Temperature}$ \n           (K)'
-    legend = ax0.legend([v for k,v in s],[k for k,v in s], title = title_legend, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., fontsize = plot_parameters['size_font_ticks'])
+        title_legend=' $\\bf{Temperature}$ (K)'    
+        #title_legend=' $\\bf{Temperature}$ \n           (K)'    
+    ncol = 8
+    legend = ax0.legend([v for k,v in s[:ncol]],[k for k,v in s[:ncol]], title = title_legend, bbox_to_anchor=(0.5, 1.05),  loc="lower center", borderaxespad=0., fontsize = plot_parameters['size_font_ticks'], ncol = ncol)
+    #legendbis = ax0.legend([v for k,v in s[ncol:]],[k for k,v in s[ncol:]], bbox_to_anchor=(0.5, 1.05),  loc="upper center", borderaxespad=0., fontsize = plot_parameters['size_font_ticks'], ncol = ncol)
+    #legend = ax0.legend([v for k,v in s],[k for k,v in s], title = title_legend, bbox_to_anchor=(1.05, 1), loc='upper left", borderaxespad=0., fontsize = plot_parameters['size_font_ticks'])
     plt.setp(legend.get_title(),fontsize = plot_parameters['size_fonts'])
+    ax0.add_artist(legend)
     #Save fig    
     filename = 'gofrs_'+files[0].split('/')[-1].split('_')[0]+'_'+folder1+'_'+folder2+'_'+atom_couple+'.pdf'
     plt.savefig(filename, bbox_inches="tight", dpi=300)

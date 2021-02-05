@@ -177,13 +177,15 @@ def creation_plot2(variable, file1, file2, MN, plot_parameters,max_den,letter):
         axis.yaxis.set_ticks_position('both')
         axis.tick_params(which = 'both', labelsize = size_font_ticks, width = size_lines/2)
         axis.grid(True, which='major',axis = 'y', linestyle=':', linewidth=size_lines/2 )
+        axis.set_facecolor((1,1,1,0))
                 
     ax.set_ylim(0,1)
     #Fine-tune figure and addition of a title per graph
     temp1, acell1 = split_name(file1)
     temp2, acell2 = split_name(file2)
     ax0 = fig.add_subplot(111, frameon=False)
-    plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, labelleft=False, left=False, labelright = False, right=False)
+    plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, 
+                    labelleft=False, left=False, labelright = False, right=False)
     if variable == 'rho':
         major_xticks = np.arange(0, 7, 0.1) 
         minor_xticks = np.arange(0, 7, 0.05)    
@@ -193,7 +195,8 @@ def creation_plot2(variable, file1, file2, MN, plot_parameters,max_den,letter):
             axis.xaxis.set_ticks_position('both')
             ax.tick_params(which = 'both', labelsize = size_font_ticks, width = size_lines/2)
             axis.set_xlim(1,max_den)
-        ax0.set_xlabel(r"Density (g.cm$^{-3}$)", fontweight = 'bold', fontsize = size_fonts , labelpad = shift_labelpad)
+        ax0.set_xlabel(r"Density (g.cm$^{-3}$)", fontweight = 'bold', 
+                       fontsize = size_fonts , labelpad = shift_labelpad)
         ax.set_xlabel(temp1+' K', fontweight = 'bold', fontsize = size_fonts )
         ax.xaxis.set_label_position('top')
         ax2.set_xlabel(temp2+' K', fontweight = 'bold', fontsize =size_fonts )
@@ -205,14 +208,19 @@ def creation_plot2(variable, file1, file2, MN, plot_parameters,max_den,letter):
             axis.xaxis.set_ticks_position('both')
             ax.tick_params(which = 'both', labelsize = size_font_ticks, width = size_lines/2)
             plt.autoscale(enable=True,axis='x',tight=False)
-        ax0.set_xlabel(r"Temperature (K)", fontweight = 'bold', fontsize = size_fonts , labelpad = shift_labelpad)
-        ax.set_xlabel(str(round(MN/(Na*float(acell1)**3*10**(-24)),2))+r' (g.cm$^{-3}$)', fontweight = 'bold', fontsize = size_fonts )
+        ax0.set_xlabel(r"Temperature (K)", fontweight = 'bold', 
+                       fontsize = size_fonts , labelpad = shift_labelpad)
+        ax.set_xlabel(str(round(MN/(Na*float(acell1)**3*10**(-24)),2))+r' (g.cm$^{-3}$)', 
+                      fontweight = 'bold', fontsize = size_fonts )
         ax.xaxis.set_label_position('top')
-        ax2.set_xlabel(str(round(MN/(Na*float(acell2)**3*10**(-24)),2))+r' (g.cm$^{-3}$)', fontweight = 'bold', fontsize =size_fonts )
+        ax2.set_xlabel(str(round(MN/(Na*float(acell2)**3*10**(-24)),2))+r' (g.cm$^{-3}$)', 
+                       fontweight = 'bold', fontsize =size_fonts )
         ax2.xaxis.set_label_position('top')
         
     if letter != '':
-        ax.text(-0.18,0.99, letter , transform=ax.transAxes, horizontalalignment = 'left', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], bbox=dict(facecolor='none', edgecolor='k', pad=3.0))  
+        ax.text(-0.18,0.99, letter , transform=ax.transAxes, horizontalalignment = 'left', 
+                fontweight = 'bold', fontsize = plot_parameters["size_fonts"],
+                bbox=dict(facecolor='none', edgecolor='k', pad=3.0))  
     
     return fig, ax, ax2
 
@@ -229,7 +237,8 @@ def creation_plot(variable,plot_parameters,max_den,letter):
     
     plt.close()
     fig, ax = plt.subplots(figsize=(12,7))
-    ax.set_ylabel(r'Species proportion', fontweight = 'bold', fontsize = size_fonts , labelpad = shift_labelpad)
+    ax.set_ylabel(r'Species proportion', fontweight = 'bold', 
+                  fontsize = size_fonts , labelpad = shift_labelpad)
     #Adjustment of ticks
     if variable == 'rho':
         major_xticks = np.arange(0, 7, 0.1) 
@@ -238,14 +247,16 @@ def creation_plot(variable,plot_parameters,max_den,letter):
         ax.set_xticks(minor_xticks, minor=True)
         ax.xaxis.set_ticks_position('both')
         ax.tick_params(which = 'both', labelsize = size_font_ticks, width = size_lines/2)
-        ax.set_xlabel(r"Density (g.cm$^{-3}$)", fontweight = 'bold', fontsize = size_fonts , labelpad = shift_labelpad/2)
+        ax.set_xlabel(r"Density (g.cm$^{-3}$)", fontweight = 'bold', 
+                      fontsize = size_fonts , labelpad = shift_labelpad/2)
         ax.set_xlim(1,max_den)
     if variable == 'T':
         major_xticks = np.arange(0, 10000, 1000) 
         ax.set_xticks(major_xticks)
         ax.xaxis.set_ticks_position('both')
         ax.tick_params(which = 'both', labelsize = size_font_ticks, width = size_lines/2)
-        ax.set_xlabel(r"Temperature (K)", fontweight = 'bold', fontsize = size_fonts , labelpad = shift_labelpad/2)
+        ax.set_xlabel(r"Temperature (K)", fontweight = 'bold', 
+                      fontsize = size_fonts , labelpad = shift_labelpad/2)
         plt.autoscale(enable=True,axis='x',tight=False)
 
     major_yticks = np.arange(0, 1.1, 0.1) 
@@ -258,7 +269,9 @@ def creation_plot(variable,plot_parameters,max_den,letter):
     ax.set_ylim(0,1)
     
     if letter != '':
-        ax.text(-0.08,0.99, letter , transform=ax.transAxes, horizontalalignment = 'left', fontweight = 'bold', fontsize = plot_parameters["size_fonts"], bbox=dict(facecolor='none', edgecolor='k', pad=3.0))  
+        ax.text(-0.08,0.99, letter , transform=ax.transAxes, horizontalalignment = 'left',
+                fontweight = 'bold', fontsize = plot_parameters["size_fonts"],
+                bbox=dict(facecolor='none', edgecolor='k', pad=3.0))  
         
     return fig,ax
 
@@ -292,23 +305,25 @@ def count_natom(species):
 
 def main(argv):
     """     ********* Main program *********     """
-    nmeltatoms = 14 #100 limit of natoms to consider a species being part of the melt 
+    nmeltatoms = 100 #limit of natoms to consider a species being part of the melt 
     #other dictionnaries and parameters for the figure for article version    
     letter = '' 
     statfile2 = ''
-    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (8,4),"size_markers" : 4,"size_lines" : 1,"shift_labelpad" : 20}
+    plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (8,4),
+                       "size_markers" : 4,"size_lines" : 1,"shift_labelpad" : 20}
+    #plot_parameters = {"size_fonts" : 12,"size_font_ticks":10,"size_figure" : (8,4),"size_markers" : 10,"size_lines" : 2,"shift_labelpad" : 20}
     #other parameters
     Na=6.022*10**23
     try:
         options,arg = getopt.getopt(argv,"hf:g:v:m:d:l:",["file1","gfile2","variable","mineralfile","density_max","letter"])
     except getopt.GetoptError:
-        print("plot_speciation-r1.py  -v <variable (rho,T)> -m <mineralfile with elements> -f <stat-concentrate_r1_abso_filename>  -g <stat-concentrate_r1_abso_filename2>  -d <maximum density to plot in g/cm3> -l <letter for article subplot, default = ''>")
+        print("plot_speciation-r1-species.py  -v <variable (rho,T)> -m <mineralfile with elements> -f <stat-concentrate_r1_abso_filename>  -g <stat-concentrate_r1_abso_filename2>  -d <maximum density to plot in g/cm3> -l <letter for article subplot, default = ''>")
         sys.exit()
     for opt,arg in options:
         if opt == '-h':
             print('')
-            print('plot_speciation-r1.py program to  Plot abundance of chemical species for selected cation as a function of rho or T')
-            print("plot_speciation-r1.py -v <variable (rho,T)> -m <mineralfile with elements> -f <stat-concentrate_r1_abso_filename>  -g <stat-concentrate_r1_abso_filename2>  -d <maximum density to plot in g/cm3> -l <letter for article subplot, default = ''>")
+            print('plot_speciation-r1-species.py program to  Plot abundance of chemical species for selected cation as a function of rho or T')
+            print("plot_speciation-r1-species.py -v <variable (rho,T)> -m <mineralfile with elements> -f <stat-concentrate_r1_abso_filename>  -g <stat-concentrate_r1_abso_filename2>  -d <maximum density to plot in g/cm3> -l <letter for article subplot, default = ''>")
             print('requires the file containing elements and number (in order to compute the densities)')
             print('')
             sys.exit()
@@ -349,9 +364,10 @@ def main(argv):
         fig, ax1 = creation_plot(variable,plot_parameters,max_den,letter)
         figurename = statfile1.split('.dat')[0]+'_'+variable  + '-species'
     
-    for statfile in allstatfiles:
+    for ii in range(len(allstatfiles)):
+        statfile = allstatfiles[ii]
         #selection of the plot
-        if allstatfiles.index(statfile) == 1:
+        if ii == 1:
             ax = ax2
         else:
             ax = ax1
@@ -366,6 +382,7 @@ def main(argv):
         list_colored_red = []
         list_colored_blue = []
         list_colored_purple = []
+        list_colored_green = []
         list_grey_species = []
         list_black_species = ["melt-like"]
         colors_species = {}
@@ -517,6 +534,8 @@ def main(argv):
                     list_colored_red.append(species1[i])
                 elif (species1[i][0] == 'N' or species1[i][0] == 'K' or species1[i][0] == 'C') and re.search('O',species1[i]):
                     list_colored_purple.append(species1[i])
+                elif species1[i][0:5] == 'Al_1O':
+                    list_colored_green.append(species1[i])
                 #We add the label
                 if max(data[i]) > 0.05:
                     x_max = xdata[variable][data[i].index(max(data[i]))]
@@ -528,6 +547,7 @@ def main(argv):
         print('list red', list_colored_red)
         print('list blue', list_colored_blue)
         print('list purple', list_colored_purple)
+        print('list green', list_colored_green)
         #**** we attribute the colors to each cluster with abundance > 0.01
         #this is for basic automatic color change
         #color = iter(plt.cm.jet(np.linspace(0,1,len(list_colored_species)))) #Creation of the color list
@@ -562,11 +582,22 @@ def main(argv):
              }
         cmpurples = LinearSegmentedColormap('purples', dict_p)
         color_p = iter(cmpurples(np.linspace(0,1,len(list_colored_purple)))) #Creation of the color list for purples
+        dict_g = {'red':   ((0.0, 0.0, 0.0),  
+                        (1.0, 0.0, 0.0)),     
+             'green': ((0.0, 1.0, 1.0),   # <- at 0.0 (first value), the green component is 0.7 (second value) (the third value may be alpha)
+                       (1.0, 0.3, 1.0)),  # <- at 1.0, the green component is 0.3
+             'blue':  ((0.0, 0.0, 0.0),
+                       (1.0, 0.0, 0.0))
+             }
+        cmgreens = LinearSegmentedColormap('greens', dict_g)
+        color_g = iter(cmgreens(np.linspace(0,1,len(list_colored_green)))) #Creation of the color list for greens
         for key in natsort.natsorted(list_colored_species):
             if key == 'O_1':
                 colors_species[key] = 'gold'
             elif key == 'O_2':
                 colors_species[key] = 'darkorange'
+            elif key == 'O_3':
+                colors_species[key] = 'tomato'
             elif key == 'Na_1' or key == 'K_1' or key == 'Ca_1' :
                 colors_species[key] = (0.5,0,1.0)
             elif key == "melt-like":
@@ -576,6 +607,7 @@ def main(argv):
         colors_species = color_change(color_r, list_colored_red, colors_species)
         colors_species = color_change(color_b, list_colored_blue, colors_species)
         colors_species = color_change(color_p, list_colored_purple, colors_species)
+        colors_species = color_change(color_g, list_colored_green, colors_species)
         #*****************************
         #*******************
         #*******
@@ -605,12 +637,16 @@ def main(argv):
                                 i+=1
                                 x, y = zip(*sorted(zip( xdata[variable], data[i])))
                                 if entry[0] in list_colored_species: #we plot only the colored lines. delete this line to plot also the grey species
-                                    line, = ax.plot(x,y, '.--', color = colors_species[entry[0]], markersize = plot_parameters["size_markers"], linewidth = plot_parameters["size_lines"])
+                                    line, = ax.plot(x,y, '.--', color = colors_species[entry[0]], 
+                                                    markersize = plot_parameters["size_markers"],
+                                                    linewidth = plot_parameters["size_lines"])
                                 nf.write(format1label(entry[0]) + '\t' + '\t'.join(str(round(perc,4)) for perc in data[i]) + '\n')
                 #we plot the last line, for the melt-like
                 i+=1
                 x, y = zip(*sorted(zip( xdata[variable], data[i])))
-                line, = ax.plot(x,y, '.--', color = colors_species['melt-like'], markersize = plot_parameters["size_markers"], linewidth = plot_parameters["size_lines"])
+                line, = ax.plot(x,y, '.--', color = colors_species['melt-like'], 
+                                markersize = plot_parameters["size_markers"], 
+                                linewidth = plot_parameters["size_lines"])
                 nf.write(format1label('melt-like') + '\t' + '\t'.join(str(round(perc,4)) for perc in data[i]) + '\n')
         else:
             i=-1
@@ -625,7 +661,9 @@ def main(argv):
                             i+=1
                             x, y = zip(*sorted(zip( xdata[variable], data[i])))
                             if entry[0] in list_colored_species: #we plot only the colored lines. delete this line to plot also the grey species
-                                line, = ax.plot(x,y, '.--', color = colors_species[entry[0]], markersize = plot_parameters["size_markers"], linewidth = plot_parameters["size_lines"])
+                                line, = ax.plot(x,y, '.--', color = colors_species[entry[0]], 
+                                                markersize = plot_parameters["size_markers"], 
+                                                linewidth = plot_parameters["size_lines"])
                             nf.write(format1label(entry[0]) + '\t' + '\t'.join(str(round(perc,4)) for perc in data[i]) + '\n')
         #                    if variable == 'T':
         #                        label_line(ax, line, entry[0], halign='right')   
@@ -645,16 +683,22 @@ def main(argv):
         #plt.gca().add_artist(legend_grey)
         #plt.setp(legend_grey.get_title(),fontsize= plot_parameters["size_fonts"])
         
-        custom_lines = [Line2D([0],[0],color = colors_species[key], ls = '--', marker = '.', markersize = plot_parameters["size_markers"], linewidth = plot_parameters["size_lines"]) for key in natsort.natsorted(list_colored_species)]
+        custom_lines = [Line2D([0],[0],color = colors_species[key], ls = '--', marker = '.', 
+                               markersize = plot_parameters["size_markers"], 
+                               linewidth = plot_parameters["size_lines"]) for key in natsort.natsorted(list_colored_species)]
         list_colored_species = format_label(natsort.natsorted(list_colored_species))
         if statfile2 != '':
-            legend = ax.legend([line for line in custom_lines],[label for label in list_colored_species], bbox_to_anchor=(0.5, 0.99), loc='upper center', fontsize = plot_parameters["size_font_ticks"],  borderaxespad=0.,ncol = 3)
+            legend = ax.legend([line for line in custom_lines],[label for label in list_colored_species], 
+                               bbox_to_anchor=(0.5, 0.99), loc='upper center', 
+                               fontsize = plot_parameters["size_font_ticks"],  borderaxespad=0.,ncol = 3)
         #if len(list_colored_species) > 16:
     #        legend = plt.legend([line for line in custom_lines],[label for label in list_colored_species],title = '$\\bf{Species}$', bbox_to_anchor=(1.01, 1), loc='upper left', fontsize = plot_parameters["size_fonts"],  borderaxespad=0., ncol = 2)
          #   legend = plt.legend([line for line in custom_lines],[label for label in list_colored_species],title = '$\\bf{Species}$', bbox_to_anchor=(0.5, 0.99), loc='upper center', fontsize = plot_parameters["size_fonts"],  borderaxespad=0.,ncol = 8)
         else:
     #        legend = plt.legend([line for line in custom_lines],[label for label in list_colored_species],title = '$\\bf{Species}$', bbox_to_anchor=(1.01, 1), loc='upper left', fontsize = plot_parameters["size_fonts"],  borderaxespad=0.)
-            legend = ax.legend([line for line in custom_lines],[label for label in list_colored_species],title = '$\\bf{Species}$', bbox_to_anchor=(0.5, 0.99), loc='upper center', fontsize = plot_parameters["size_fonts"],  borderaxespad=0.,ncol = 8)
+            legend = ax.legend([line for line in custom_lines],[label for label in list_colored_species],
+                               title = '$\\bf{Species}$', bbox_to_anchor=(0.5, 0.99), 
+                               loc='upper center', fontsize = plot_parameters["size_fonts"],  borderaxespad=0.,ncol = 8)
             plt.setp(legend.get_title(),fontsize= plot_parameters["size_fonts"])
         
         nf.write('\n')
@@ -663,7 +707,7 @@ def main(argv):
 
     
     
-    figurename = figurename +'.png'
+    figurename = figurename +'.pdf'
     plt.savefig(figurename, bbox_inches='tight', dpi=300)
     print(figurename, 'is created')
     

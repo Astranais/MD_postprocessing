@@ -14,7 +14,7 @@ Langage : Python3
 #     ********* Importation of the packages and modules used here *********     """
 import sys
 import getopt
-import glob
+import glob, re
 import numpy as np
 import matplotlib.pyplot as plt
 import crystallography as cr
@@ -35,6 +35,24 @@ def split_name(filename):
 
 
 
+def format1label(label):
+    """formatage of compound label """
+    i=0
+    while True:
+        if i <= len(label)-1:
+            if re.match('[0-9]',label[i]):
+                num=0
+                try:
+                    while re.match('[0-9]',label[i+1+num]):
+                        num +=1
+                except IndexError: #index error when we arrive at the end of the cluster name
+                    pass
+                    #print('end of the cluster')
+                label = label[:i]+'$_{'+label[i:i+1+num]+'}$' + label[i+1+num:]
+                i = i+5
+            i = i+1
+        else:break
+    return label
 
 
     
@@ -120,13 +138,17 @@ def main(argv):
         for i in range(len(note)):
             note[i] = str(round(note[i],2)) + r' g.cm$^{-3}$'       #note = ['2.19 g/cm3','1.98 g/cm3', ...]     
     #Colormap definition
-    #cm = LinearSegmentedColormap.from_list("", ["blue","green","red"])
+    name = 'acton'
+    cm_data = np.loadtxt("/Users/akobsch/Dropbox/Recherche/PhD-MD-silicates/simulations/scripts/Analysis/ScientificColourMaps6/"+name+"/"+name+".txt")
+    #cm_data = cm_data[::-1] #for reverse colors (hawaii,lajolla)
+    new_map = LinearSegmentedColormap.from_list('new', cm_data[::-1])#cm_data[20:])# for lajolla #cm_data[:-20] for devon, davos, oslo
     norm=plt.Normalize(0,max_lifetime)
     #plot
     plt.close(1)  
     h = 4 * len(number) #height of the figure depends on the number of T or rho we display
     fig = plt.figure(1,figsize = (7,h))
-    plt.subplots_adjust(top = 0.97, bottom = 0.07, right = 0.89, left = 0.07, hspace = 0, wspace = 0)
+    plt.subplots_adjust(top = 0.97, bottom = 0.07, right = 0.89, left = 0.07, 
+                        hspace = 0, wspace = 0)
     for subplot in range(1,len(number)+1):
         plt.subplot(len(number), 1, subplot)
         ax = plt.gca()
@@ -136,7 +158,8 @@ def main(argv):
             if variable == 'rho':
                 fixed = 'T'+temperature0
                 if temperature == number[subplot-1]: 
-                    lifetime, length = np.loadtxt(file, usecols = (1,3), skiprows = 2, unpack = True ) 
+                    lifetime, length = np.loadtxt(file, usecols = (1,3), 
+                                                  skiprows = 2, unpack = True ) 
                     if np.size(length) != 1:
                         result=sorted(zip(lifetime,length),key=lambda x: x[0]) #we sort the cluster lifetime by lifetime
                         lifetime, length = zip(*result)
@@ -144,14 +167,16 @@ def main(argv):
                     xarray = (np.random.rand(np.size(length))*2-1) * (0.02)   +  (MN/(Na* float(acell) **3*10**(-24)))  #random vector around 0, * spread (here 0.02g/cm3), + center of the x data (acell) 
                     #xarray = np.ones(np.size(length)) *  MN/(Na* float(acell) **3*10**(-24)) 
                     try:
-                        s = ax.scatter(xarray, length, s=20,  c=lifetime, facecolor = 'none', lw = 1, norm=norm, cmap = plt.cm.get_cmap('jet'))#cmap = cm)
+                        s = ax.scatter(xarray, length, s=20,  c=lifetime, facecolor = 'none', lw = 1, norm=norm, cmap = new_map)#cmap = plt.cm.get_cmap('jet'))
                     except IndexError: #problem if we have only one data on lifetime = only have the melt
-                        s = ax.scatter(xarray, length, s=20,  edgecolor=(0.5,0,0), facecolor = 'none', lw = 1)
+                        s = ax.scatter(xarray, length, s=20,  edgecolor=(0.5,0,0), 
+                                       facecolor = 'none', lw = 1)
                     s.set_facecolor('none')
             else:
                 fixed = 'a'+acell0
                 if acell == number[subplot-1]:
-                    lifetime, length = np.loadtxt(file, usecols = (1,3,), skiprows = 2, unpack = True ) 
+                    lifetime, length = np.loadtxt(file, usecols = (1,3,), 
+                                                  skiprows = 2, unpack = True ) 
                     if np.size(length) != 1:
                         result=sorted(zip(lifetime,length),key=lambda x: x[0]) #we sort the cluster lifetime by lifetime
                         lifetime, length = zip(*result)
@@ -159,9 +184,11 @@ def main(argv):
                     xarray = (np.random.rand(np.size(length))*2-1) * (100)   +   float(temperature)  #random vector around 0, * spread (here 100K), + center of the x data (T) 
                     #xarray = np.ones(np.size(length)) *  float(temperature)
                     try:
-                        s = ax.scatter(xarray, length, s=20,  c=lifetime, facecolor = 'none', lw = 1, norm=norm, cmap = plt.cm.get_cmap('jet'))#cmap = cm)
+                        s = ax.scatter(xarray, length, s=20,  c=lifetime, 
+                                       facecolor = 'none', lw = 1, norm=norm, cmap = new_map) #cmap = plt.cm.get_cmap('jet'))
                     except IndexError: #problem if we have only one data on lifetime = only have the melt
-                        s = ax.scatter(xarray, length, s=20,  edgecolor=(0.5,0,0), facecolor = 'none', lw = 1)
+                        s = ax.scatter(xarray, length, s=20,  edgecolor=(0.5,0,0), 
+                                       facecolor = 'none', lw = 1)
                     s.set_facecolor('none')
         cb = fig.colorbar(s)
         cb.set_label('$\\bf{Total}$ $\\bf{lifetime}$ $\\bf{(fs)}$')
@@ -183,25 +210,30 @@ def main(argv):
         if  subplot != len(number):
             plt.setp(ax.get_xticklabels(), visible=False)
         ax.tick_params(which = 'both', labelsize = 10, width = 0.5)
+        #plt.axhline(y=13,color='r', linestyle ='-')
         
         #plt.title(note[subplot-1], fontsize=15, fontweight='bold')
         if letter != '':
-            ax.text(0.01,0.95, letter , transform=ax.transAxes, horizontalalignment = 'left', fontweight = 'bold', fontsize = 12, bbox=dict(facecolor='none', edgecolor='k', pad=3.0)) 
+            ax.text(0.01,0.95, format1label(letter) , transform=ax.transAxes, 
+                    horizontalalignment = 'left', fontweight = 'bold', fontsize = 12, 
+                    bbox=dict(facecolor='w', edgecolor='k', pad=3.0)) 
             
-        ax.text(1.195,0.985, '+' , transform=ax.transAxes, horizontalalignment = 'right', fontweight = 'bold', fontsize = 10) 
+        ax.text(1.195,0.985, '+' , transform=ax.transAxes, horizontalalignment = 'right', 
+                fontweight = 'bold', fontsize = 10) 
         
     
     
     # Fine-tune figure
     ax0 = fig.add_subplot(111, frameon=False) 
-    plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, labelleft=False, left=False, labelright = False, right=False)
+    plt.tick_params(labeltop=False, top=False, labelbottom=False, bottom=False, 
+                    labelleft=False, left=False, labelright = False, right=False)
     ax0.set_xlabel(xlabel, fontweight = 'bold', fontsize = 12, labelpad = 35)    
     ax0.set_ylabel('Cluster size', fontweight = 'bold', fontsize = 12 ,labelpad = 30)
 
       
-    figurename = 'speciation-size_' + files[0].split('_')[0]  + '_' + fixed + '-v' + variable + '-l' + str(max_lifetime) + 'fs' +'.png'
+    figurename = 'speciation-size_' + files[0].split('_')[0]  + '_' + fixed + '-v' + variable + '-l' + str(max_lifetime) + 'fs' +'.pdf'
     print(figurename, 'is created')
-    fig.savefig(figurename, bbox_inches = 'tight', dpi = 300)
+    fig.savefig(figurename, bbox_inches = 'tight', dpi = 90)
     #plt.show()
 
 
