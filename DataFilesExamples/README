@@ -1,1 +1,5 @@
-Here are some data files used be the scripts in the other folders.
+Here are some data files used or created by the scripts in the other folders.
+
+the headerfile.txt is the so called "mineralfile" used in a lot of scripts
+
+due to their big size, no .umd file is shown here but they are easily obtained from any of your OUTCAR using the VaspParser 
