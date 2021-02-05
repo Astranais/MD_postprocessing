@@ -287,7 +287,9 @@ def analyze_gofrs_interactive(data,file,allpairs, guess_xmax, guess_xmin, atoms,
             if (pair == atom_pair):
                 #interactive fit only for the selected allpairs of atoms
                 print(pair, '\t --> interactive fit')
-                data, bonds, guess_xmin, guess_xmax = interactive_fit(data,file,allpairs, guess_xmax, guess_xmin, distance, bonds, pair)
+                data, bonds, guess_xmin, guess_xmax = interactive_fit(data,file,allpairs,
+                                                                      guess_xmax, guess_xmin,
+                                                                      distance, bonds, pair)
     return(data,bonds, guess_xmax, guess_xmin)
 
 
@@ -304,7 +306,9 @@ def analyze_gofrs_automatic(data,file,allpairs, guess_xmax, guess_xmin, atoms, b
                 if (guess_xmax[pair] == 0 or guess_xmin[pair] == 0):  
                     #if we haven't succeeded to have initial guesses, then we try again with interactive plot
                     print(pair, '\t --> interactive fit')
-                    data, bonds, guess_xmin, guess_xmax = interactive_fit(data,file,allpairs, guess_xmax, guess_xmin, distance, bonds, pair)
+                    data, bonds, guess_xmin, guess_xmax = interactive_fit(data,file,allpairs, 
+                                                                          guess_xmax, guess_xmin,
+                                                                          distance, bonds, pair)
                 else: #if we have correct initial guesses for this pair of atoms, then we use an automatic fitting process
                     print(pair, '\t --> automatic fit')
                     #print(pair,allpairs[pair],allpairs[pair]+1)
@@ -368,7 +372,8 @@ def analyze_gofrs_automatic(data,file,allpairs, guess_xmax, guess_xmin, atoms, b
                         y_intgofr = yaxis_intgofr[int(poly_min_i)]  # y value of the integral of gofr that corresponds to the min x value of gofr
                         y_intgofr_reverse = yaxis_intgofr_reverse[int(poly_min_i)]  # y value of the integral of gofr that corresponds to the min x value of gofr
                         
-                        plt.plot(distance, gofr, 'o', xaxis_max, max_fit(xaxis_max), '-', xaxis_min, min_fit(xaxis_min), 'r-', markersize=2)
+                        plt.plot(distance, gofr, 'o', xaxis_max, max_fit(xaxis_max), '-', 
+                                 xaxis_min, min_fit(xaxis_min), 'r-', markersize=2)
                                
                     else: # simply output 0's if the data is no good
                         xmax_gofr = 0
@@ -407,13 +412,13 @@ def main(argv):
     try:
         options,arg = getopt.getopt(argv,"ha:b:",["atoms","bondfile"])
     except getopt.GetoptError:
-        print("analyze_gofr.py -a <pairs of atoms (option)>(ex: 'Ca-O,Ca-Ca', default includes all) -b < 0 or 1 (1= write bond file, 0 do not write bond file)>")
+        print("analyze_gofr_semi_automatic.py -a <pairs of atoms (option)>(ex: 'Ca-O,Ca-Ca', default includes all) -b < 0 or 1 (1= write bond file, 0 do not write bond file)>")
         sys.exit()
     for opt,arg in options:
         if opt == '-h':
             print('*******')
-            print('analyze_gofr.py program to extract all relevant data from the gofr.dat files created by the script gofrs.py and write them into temperature_gofrs.txt files')
-            print("analyze_gofr.py -a <pairs of atoms (option)>(ex: 'Ca-O,Ca-Ca', default includes all) -b < 0 or 1 (1= write bond file, 0 do not write bond file)>")
+            print('analyze_gofr_semi_automatic.py program to extract all relevant data from the gofr.dat files created by the script gofrs.py and write them into temperature_gofrs.txt files')
+            print("analyze_gofr_semi_automatic.py -a <pairs of atoms (option)>(ex: 'Ca-O,Ca-Ca', default includes all) -b < 0 or 1 (1= write bond file, 0 do not write bond file)>")
             print('WARNING! for efficiency, your data needs to be located in different folders for each T and you should launch this script from the folder containing every subfolder temperature')
             print('WARNING! you have to click FIRST on the maximum, and THEN on the minimum')
             print(' ')
@@ -464,11 +469,15 @@ def main(argv):
                     interactive = 1
                 if interactive == 1:
                     #we compute the min,max etc. from the gofr and int using fit and interactive plot
-                    data, bonds, guess_xmax, guess_xmin = analyze_gofrs_interactive(data,file,allpairs, guess_xmax, guess_xmin, atoms, bonds)
+                    data, bonds, guess_xmax, guess_xmin = analyze_gofrs_interactive(data,file,allpairs, 
+                                                                                    guess_xmax, guess_xmin,
+                                                                                    atoms, bonds)
                     interactive = 0
                 else:
                     #we compute the min,max etc. from the gofr and int using automatic fit based on previous values for initial guesses
-                    data, bonds, guess_xmax, guess_xmin = analyze_gofrs_automatic(data,file,allpairs, guess_xmax, guess_xmin, atoms, bonds)       
+                    data, bonds, guess_xmax, guess_xmin = analyze_gofrs_automatic(data,file,allpairs,
+                                                                                  guess_xmax, guess_xmin, 
+                                                                                  atoms, bonds)       
                 #we write in the file the results
                 #first we complete by X the values not computed 
                 for pair in allpairs:
