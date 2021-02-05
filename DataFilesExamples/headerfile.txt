@@ -1,0 +1,2 @@
+elements	Na	Al	Si	O
+number	16	16	48	128

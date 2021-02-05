@@ -1,0 +1,7 @@
+T	rho(g/cm3)	P(GPa)	Chi2_red	rho(gas_spinodal)	P(gas_spinodal)	rho_crit	P_crit	is_d_zero?
+T3	1.46	-0.78	0.102	0.12	0.98	0.79	0.1	yes
+T4	1.36	-0.36	0.017	0.59	0.05	0.98	-0.16	yes
+T4.5	1.18	-0.15	0.002	0.56	0.01	0.87	-0.07	yes
+T5	nan	nan	0.005	nan	nan	1.03	-0.0	no
+T6	nan	nan	0.002	nan	nan	0.94	0.32	no
+T7	nan	nan	0.0	nan	nan	0.87	0.53	no

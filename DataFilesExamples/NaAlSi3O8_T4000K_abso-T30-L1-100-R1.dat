@@ -1,0 +1,13 @@
+cluster	./NaAlSi3O8_T4_nvt_a12.0.	./NaAlSi3O8_T4_nvt_a12.5.	./NaAlSi3O8_T4_nvt_a13.0.	./NaAlSi3O8_T4_nvt_a13.5.	./NaAlSi3O8_T4_nvt_a14.0.	./NaAlSi3O8_T4_nvt_a14.5.	./NaAlSi3O8_T4_nvt_a15.0.	./NaAlSi3O8_T4_nvt_a15.5.	./NaAlSi3O8_T4_nvt_a16.0.	./NaAlSi3O8_T4_nvt_a16.5.	./NaAlSi3O8_T4_nvt_a17.0.	./NaAlSi3O8_T4_nvt_a17.5.	./NaAlSi3O8_T4_nvt_a18.0.	./NaAlSi3O8_T4_nvt_a18.5.	./NaAlSi3O8_T4_nvt_a19.0.	
+Na_1								132.0	301.0	862.0	1444.0	3666.0	3904.0	4128.0	4708.0	
+Si_1O_2									128.0	50.0	170.0	334.0	792.0	1762.0	910.0	
+Si_1O_1										466.0	460.0	1188.0	810.0	926.0	2176.0	
+O_2											760.0		84.0	1582.0		
+Na_2Si_1O_3												32.0				
+O_1												52.0	76.0			
+Na_1Si_1O_1												146.0	134.0		228.0	
+Na_1Si_1O_3													156.0	64.0	528.0	
+Si_1O_3													360.0	90.0	288.0	
+Na_1O_2														114.0		
+Si_2O_5														34.0		
+Na_1Si_1O_2															152.0	

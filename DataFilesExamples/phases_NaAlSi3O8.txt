@@ -1,0 +1,9 @@
+Ref	Minerals	P(Gpa)	T(K)	AlO_x	SiO_x
+Tenner2007	Albite	0.5	1000	4	4
+Tenner2007	Albite	1.5	1000	4	4
+Bell1969	Jadeite+Quartz	1.8	500	6	4
+Bell1969	Jadeite+Coesite	7	1273	6	4
+Liu1978	Jadeite+Stishovite	17	1273	6	6
+Liu1978	"hollandite" type NaAlSi3O8	22	1273	6	6
+Liu1978/Sekine1992	Ca-Fe2O3 type NaAlSiO4+Stishovite	50	1273	6	6
+Sekine1992	perovkite structure	170	1273	6	6

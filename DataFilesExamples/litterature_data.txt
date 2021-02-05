@@ -1,0 +1,124 @@
+reference	compo	mineral	zero density	Expe Hug density (g/cm3)	Expe Hug Pressure (kb)	Calculated Hug Temperature (K)
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.72	3.22	148	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.71	3.47	210	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.73	3.52	213	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.73	4.17	331	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.71	4.14	330	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.73	4.33	442	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.73	4.42	435	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.72	4.54	538	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.73	4.54	542	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.75	4.71	704	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	3.76	4.73	782	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.73	4.74	788	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.75	4.9	849	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.79	4.93	913	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.73	4.97	888	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.7	4.89	937	0
+McQueen $et~al.$ (1967)	anorthosite	CaAl2Si2O8	2.72	4.96	952	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	3.12	136	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	3.44	195	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	3.86	287	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	3.92	303	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	4.01	322	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	4.31	410	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	4.45	524	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	4.6	677	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	4.64	747	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	4.76	786	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	4.8	892	0
+McQueen $et~al.$ (1967)	albitite	NaAlSi3O8	2.61	4.82	904	0
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	3.52	4.18	347	967
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	3.52	4.22	368	1073
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	3.52	4.26	390	1213
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	3.52	4.29	411	1333
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	3.52	4.33	434	1458
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	3.52	4.37	457	1590
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	3.52	4.41	481	1729
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	3.52	4.44	506	1874
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	3.52	4.48	531	2026
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	3.52	4.52	557	2185
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	2.561	3.034	114	0
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	2.55	4.184	296	0
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	2.561	4.355	449	0
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	2.561	4.268	455	0
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	2.561	4.551	572	0
+Ahrens $et~al.$ (1969)	microcline	KAlSi3O8	2.561	4.56	576	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	3.65	4.17	336	1165
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	3.65	4.24	389	1417
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	3.65	4.31	444	1729
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	3.65	4.39	504	2047
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	3.65	4.46	567	2398
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	3.65	4.55	634	2747
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	3.65	4.63	705	3167
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.64	3.623	183	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.63	3.509	177	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.64	3.97	272	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.63	3.98	275	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.63	3.85	285	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.63	4	275	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.64	4.29	410	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.64	4.27	417	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.64	4.31	420	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.63	4.26	422	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.625	4.31	417	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.64	4.27	464	0
+Ahrens $et~al.$ (1969)	oligoclase	NaAlSi3O8	2.63	4.54	674	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	3.84	4.1	233	465
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	3.84	4.2	346	1138
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	3.84	4.3	472	1912
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	3.84	4.4	612	2795
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.557	2.95	107	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.556	3.18	151	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.557	3.19	157	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.558	3.47	206	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.558	3.48	205	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.555	3.64	254	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.559	3.82	304	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.56	3.92	296	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.556	3.92	300	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.557	3.86	313	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.56	4.1	290	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.556	4.28	314	0
+Ahrens and Liu (1973)	orthoclase	KAlSi3O8	2.559	4.39	340	0
+Boslough $et~al.$ (1986a)	anorthite	CaAl2Si2O8	2.6908	0	48.5	2323
+Boslough $et~al.$ (1986a)	anorthite	CaAl2Si2O8	2.6909	0	55.3	2723
+Boslough $et~al.$ (1986a)	anorthite	CaAl2Si2O8	2.69	0	66.6	2997
+Boslough $et~al.$ (1986a)	anorthite	CaAl2Si2O8	2.6953	0	84.6	4002
+Boslough $et~al.$ (1986a)	anorthite	CaAl2Si2O8	2.6899	0	90	3802
+Boslough $et~al.$ (1986a)	anorthite	CaAl2Si2O8	2.6927	0	92.9	4564
+Boslough $et~al.$ (1986a)	anorthite	CaAl2Si2O8	2.6893	0	111.4	4904
+Boslough $et~al.$ (1986a)	anorthite	CaAl2Si2O8	2.6944	0	117.6	5741
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.691	2.881	83.2	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.697	2.912	83.7	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.693	2.92	84.6	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.692	2.923	96.9	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.693	3.295	205.2	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.693	4.186	393.5	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6908	4.637	478	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6909	4.615	554	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.69	4.645	674	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	26953	4.978	829	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6899	4.89	895	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6923	4.838	918	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6927	4.875	930	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6894	4.856	970	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6912	4.816	1038	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6912	4.917	1108	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6893	4.948	1114	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6912	4.9	1162	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6944	4.938	1185	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6924	5.064	1207	0
+Boslough $et~al.$ (1986b)	anorthite	CaAl2Si2O8	2.6903	5.146	1244	0
+Boslough $et~al.$ (1986b)	anorthosite	CaAl2Si2O8	2.8414	5.149	1226	0
+Boslough $et~al.$ (1986b)	anorthosite	CaAl2Si2O8	2.8914	5.183	1255	0
+Asimow and Ahrens (2010)	anorthite	CaAl2Si2O8	2.585	3.33	94	0
+Asimow and Ahrens (2010)	anorthite	CaAl2Si2O8	2.585	3.4	98	0
+Asimow and Ahrens (2010)	anorthite	CaAl2Si2O8	2.585	3.54	120	0
+Asimow and Ahrens (2010)	anorthite	CaAl2Si2O8	2.585	3.57	159	0
+Asimow and Ahrens (2010)	anorthite	CaAl2Si2O8	2.585	4.06	267	0
+Asimow and Ahrens (2010)	anorthite	CaAl2Si2O8	2.585	4.29	356	0
+Asimow and Ahrens (2010)	anorthite	CaAl2Si2O8	2.585	4.57	839	0
+Asimow and Ahrens (2010)	anorthite	CaAl2Si2O8	2.585	4.66	953	0
+Asimow and Ahrens (2010)	anorthite	CaAl2Si2O8	2.585	4.77	1115	0
+Asimow and Ahrens (2010)	anorthite	CaAl2Si2O8	2.585	4.97	1255	0
